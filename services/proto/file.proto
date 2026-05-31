@@ -1,0 +1,142 @@
+syntax = "proto3";
+package suiApi;
+
+import "base.proto";
+
+option cc_generic_services = true;
+
+//图像文件上传
+message httpUploadImageReq {}
+
+//RPC图像文件上传
+message uploadImageReq {
+  optional string id = 1;
+  optional string sessionId = 2;
+  FileInfo fileInfo = 3;
+}
+
+message uploadImageResult {
+  optional string fileId = 1;
+}
+
+message uploadImageRsp {
+  optional string id = 1;
+  optional int32 errorCode = 2;
+  optional string errorMsg = 3;
+  // 依据之前的接口惯例，响应通常包含一个 result 结构体
+  uploadImageResult result = 4;
+}
+
+//图片下载
+message httpDownloadImageReq {}
+
+message downloadImageReq {
+  optional string id = 1;
+  optional string sessionId = 2;
+  optional string fileId = 3;
+}
+
+message downloadImageRsp {
+  optional string id = 1;
+  optional int32 errorCode = 2;
+  optional string errorMsg = 3;
+  FileInfo fileInfo = 4;
+}
+
+//视频上传
+//初始化/申请上传
+message httpInitVideoUploadReq {}
+message initVideoUploadReq {
+  optional string id = 1;
+  optional string sessionId = 2;
+  // 分片规划
+  optional int32 totalChunks = 4; // 计算得出的总分片数
+  optional string fileid = 5; //非空值说明是继续上传，fileid为继续上传的视频id
+}
+message initVideoUploadResult {
+  optional string uploadId = 1; // 服务端生成的全局唯一上传ID (供后续上传使用)
+  optional int32 currentChunkIndex = 2; //默认从零开始，当继续上传时，从当前缺少的分片的第一个开始上传
+}
+message initVideoUploadRsp {
+  optional string id = 1;
+  optional int32 errorCode = 2;
+  optional string errorMsg = 3;
+  initVideoUploadResult result = 4;
+}
+
+//发送单个分片
+message httpUploadVideoPartReq {}
+message uploadVideoPartReq {
+  optional string id = 1;
+  optional string sessionId = 2;
+  // 凭证与定位
+  optional string fileId = 3; // 存储id
+  optional int32 chunkIndex = 4; // 当前是第几个分片 (从 0 开始)
+  // 数据安全与本体
+  optional string chunkMd5 = 5; // 当前这一小块分片的 MD5，防止网络传输抖动
+  optional bytes chunkData = 6; // 二进制分片数据本体
+}
+
+message uploadVideoPartRsp {
+  optional string id = 1;
+  optional int32 errorCode = 2;
+  optional string errorMsg = 3;
+}
+
+//发送合并请求
+message httpCompleteVideoUploadReq {}
+message completeVideoUploadReq {
+  optional string id = 1;
+  optional string sessionId = 2;
+  optional string fileId = 3;
+}
+
+message completeVideoUploadRsp {
+  optional string id = 1;
+  optional int32 errorCode = 2;
+  optional string errorMsg = 3;
+}
+
+//视频下载
+//元数据获取
+message httpGetVideoDataReq {}
+message getVideoDataReq {
+  optional string id = 1;
+  optional string sessionId = 2;
+  optional string fileId = 3;
+}
+
+message getVideoDataRsp {
+  optional string id = 1;
+  optional int32 errorCode = 2;
+  optional string errorMsg = 3;
+  FileInfo fileInfo = 4;
+}
+
+//定位视频下载
+message httpDownloadVideoReq {}
+message downloadVideoReq {
+  optional string id = 1;
+  optional string sessionId = 2;
+  optional string fileId = 3;
+  optional int32 chunkIndex = 4;
+}
+
+message downloadVideoRsp {
+  optional string id = 1;
+  optional int32 errorCode = 2;
+  optional string errorMsg = 3;
+  FileInfo fileInfo = 4;
+}
+
+service fileServices {
+  rpc uploadImage(uploadImageReq) returns (uploadImageRsp);
+  rpc downloadImage(downloadImageReq) returns (downloadImageRsp);
+
+  rpc initVideoUpload(initVideoUploadReq) returns (initVideoUploadRsp);
+  rpc uploadVideoPart(uploadVideoPartReq) returns (uploadVideoPartRsp);
+  rpc completeVideoUpload(completeVideoUploadReq) returns (completeVideoUploadRsp);
+
+  rpc getVideoData(getVideoDataReq) returns (getVideoDataRsp);
+  rpc downloadVideo(downloadVideoReq) returns (downloadVideoRsp);
+}

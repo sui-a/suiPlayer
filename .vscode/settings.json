@@ -1,0 +1,9 @@
+{
+    "workbench.colorTheme": "Dark+",
+    "editor.fontSize": 14,
+    
+    // 检查或添加下面这段
+    "files.associations": {
+        "*.inc": "cpp"
+    }
+}

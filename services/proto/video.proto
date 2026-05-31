@@ -1,0 +1,291 @@
+syntax = "proto3";
+package suiApi;
+
+import "base.proto";
+
+option cc_generic_services = true;
+
+
+//新增视频
+message newVideoReq{
+    optional string id = 1;
+    optional string sessionId = 2;
+    optional VideoInfo videoInfo = 4;
+}
+
+message newVideoRsp{
+    optional string id = 1;
+    optional int32 errorCode = 2;
+    optional string errorMsg = 3;
+}
+
+//视频删除
+message deleteVideoReq{
+    optional string id = 1;
+    optional string sessionId = 2;
+    optional string videoId = 3;
+}
+
+message deleteVideoRsp{
+    optional string id = 1;
+    optional int32 errorCode = 2;
+    optional string errorMsg = 3;
+}
+
+//点赞判断
+message isLikeVideoReq{
+    optional string id = 1;
+    optional string sessionId = 2;
+    optional string videoId = 3;
+}
+
+message isLikeVideoResult{
+    optional bool isLiked = 1;  //当前是否点赞
+}
+
+message isLikeVideoRsp{
+    optional string id = 1;
+    optional int32 errorCode = 2;
+    optional string errorMsg = 3;
+    isLikeVideoResult result = 4;
+}
+
+//点赞/取消点赞视频
+message setLikeVideoReq{
+    optional string id = 1;
+    optional string sessionId = 2;
+    optional string videoId = 3;
+}
+
+message setLikeVideoRsp{
+    optional string id = 1;
+    optional int32 errorCode = 2;
+    optional string errorMsg = 3;
+}
+
+//视频播放
+message playVideoReq{
+    optional string id = 1;
+    optional string sessionId = 2;
+    optional string videoId = 3;
+}
+
+message playVideoRsp{
+    optional string id = 1;
+    optional int32 errorCode = 2;
+    optional string errorMsg = 3;
+}
+
+//新增视频弹幕
+message addVideoSubtitleReq{
+    optional string id = 1;
+    optional string sessionId = 2;
+    optional string videoId = 3;
+    VideoSubtitleInfo videoSubtitleInfo = 4;
+}
+
+message addVideoSubtitleRsp{
+    optional string id = 1;
+    optional int32 errorCode = 2;
+    optional string errorMsg = 3;
+}
+
+//获取视频弹幕列表
+message getVideoSubtitleReq{
+    optional string id = 1;
+    optional string sessionId = 2;
+    optional string videoId = 3;
+}
+
+message getVideoSubtitleResult{
+    repeated VideoSubtitleInfo videoSubtitleList = 1;
+}
+
+message getVideoSubtitleRsp{
+    optional string id = 1;
+    optional int32 errorCode = 2;
+    optional string errorMsg = 3;
+    getVideoSubtitleResult result = 4;
+}
+
+//视频审核
+message checkVideoReq{
+    optional string id = 1;
+    optional string sessionId = 2;
+    optional string videoId = 3;
+    optional bool isApproved = 4; //是否认可
+}
+
+message checkVideoRsp{
+    optional string id = 1;
+    optional int32 errorCode = 2;
+    optional string errorMsg = 3;
+}
+
+//视频上架
+message publishVideoReq{
+    optional string id = 1;
+    optional string sessionId = 2;
+    optional string videoId = 3;
+}
+
+message publishVideoRsp{
+    optional string id = 1;
+    optional int32 errorCode = 2;
+    optional string errorMsg = 3;
+}
+
+//视频下架
+message removeShelvesVideoReq{
+    optional string id = 1;
+    optional string sessionId = 2;
+    optional string videoId = 3;
+}
+
+message removeShelvesVideoRsp{
+    optional string id = 1;
+    optional int32 errorCode = 2;
+    optional string errorMsg = 3;
+}
+
+//获取用户视频列表
+message getUserVideoListReq{
+    optional string id = 1;
+    optional string sessionId = 2;
+    optional string userId = 3;
+    //
+    optional int32 pageIndex = 4; //页索引
+    optional int32 pageCount = 5; //每⻚条⽬数量
+    optional videoStatus videoStatus = 6; //视频状态
+}
+
+message getUserVideoListResult{
+    repeated VideoInfo videoList = 1;
+}
+
+message getUserVideoListRsp{
+    optional string id = 1;
+    optional int32 errorCode = 2;
+    optional string errorMsg = 3;
+    getUserVideoListResult result = 4;
+}
+
+//获取状态视频列表
+message getStatusVideoListReq{
+    optional string id = 1;
+    optional string sessionId = 2;
+    optional videoStatus videoStatus = 3; //视频状态
+    //
+    optional int32 pageIndex = 4; //页索引
+    optional int32 pageCount = 5; //每⻚条⽬数量
+}
+
+message getStatusVideoListResult{
+    optional int32 totalCount = 1; //总视频数量
+    repeated VideoInfo videoList = 2;
+}
+
+message getStatusVideoListRsp{
+    optional string id = 1;
+    optional int32 errorCode = 2;
+    optional string errorMsg = 3;
+    getStatusVideoListResult result = 4;
+}
+
+//主页获取随机视频
+message getHomeRandomVideoListReq{
+    optional string id = 1;
+    optional string sessionId = 2;
+    //
+    optional int32 pageIndex = 3; //页索引
+    optional int32 pageCount = 4; //每⻚条⽬数量
+}
+
+message getHomeRandomVideoListResult{
+    repeated VideoInfo videoList = 1;
+}
+
+message getHomeRandomVideoListRsp{
+    optional string id = 1;
+    optional int32 errorCode = 2;
+    optional string errorMsg = 3;
+    getHomeRandomVideoListResult result = 4;
+}
+
+//获取分类视频列表
+message getCategoryVideoListReq{
+    optional string id = 1;
+    optional string sessionId = 2;
+    optional int32 videoTypeId = 3;
+    //
+    optional int32 pageIndex = 4; //页索引
+    optional int32 pageCount = 5; //每⻚条⽬数量
+}
+message getCategoryVideoListResult{
+    repeated VideoInfo videoList = 1;
+}
+
+message getCategoryVideoListRsp{
+    optional string id = 1;
+    optional int32 errorCode = 2;
+    optional string errorMsg = 3;
+    getCategoryVideoListResult result = 4;
+}
+
+//获取标签视频列表
+message getTagVideoListReq{
+    optional string id = 1;
+    optional string sessionId = 2;
+    optional int32 videoTagId = 3;
+    //
+    optional int32 pageIndex = 4; //页索引
+    optional int32 pageCount = 5; //每⻚条⽬数量
+}
+message getTagVideoListResult{
+    repeated VideoInfo videoList = 1;
+}
+message getTagVideoListRsp{
+    optional string id = 1;
+    optional int32 errorCode = 2;
+    optional string errorMsg = 3;
+    getTagVideoListResult result = 4;
+}
+
+//搜索视频列表
+message searchVideoListReq{
+    optional string id = 1;
+    optional string sessionId = 2;
+    optional string searchKey = 3; //搜索关键字
+    //
+    optional int32 pageIndex = 4; //页索引
+    optional int32 pageCount = 5; //每⻚条⽬数量
+}
+message searchVideoListResult{
+    int32 totalCount = 1; //总视频数量
+    repeated VideoInfo videoList = 2;
+}
+message searchVideoListRsp{
+    optional string id = 1;
+    optional int32 errorCode = 2;
+    optional string errorMsg = 3;
+    searchVideoListResult result = 4;
+}
+
+service VideoService{
+    rpc newVideo(newVideoReq) returns (newVideoRsp);
+    rpc deleteVideo(deleteVideoReq) returns (deleteVideoRsp);
+    rpc isLikeVideo(isLikeVideoReq) returns (isLikeVideoRsp);
+    rpc setLikeVideo(setLikeVideoReq) returns (setLikeVideoRsp);
+    rpc playVideo(playVideoReq) returns (playVideoRsp);
+    rpc addVideoSubtitle(addVideoSubtitleReq) returns (addVideoSubtitleRsp);
+    rpc getVideoSubtitle(getVideoSubtitleReq) returns (getVideoSubtitleRsp);
+    rpc reviewVideo(checkVideoReq) returns (checkVideoRsp);
+    rpc publishVideo(publishVideoReq) returns (publishVideoRsp);
+    rpc removeShelvesVideo(removeShelvesVideoReq) returns (removeShelvesVideoRsp);
+    rpc getUserVideoList(getUserVideoListReq) returns (getUserVideoListRsp);
+    rpc getStatusVideoList(getStatusVideoListReq) returns (getStatusVideoListRsp);
+    rpc getHomeRandomVideoList(getHomeRandomVideoListReq) returns (getHomeRandomVideoListRsp); 
+    rpc getCategoryVideoList(getCategoryVideoListReq) returns (getCategoryVideoListRsp);
+    rpc getTagVideoList(getTagVideoListReq) returns (getTagVideoListRsp);
+    rpc searchVideoList(searchVideoListReq) returns (searchVideoListRsp);
+}

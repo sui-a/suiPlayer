@@ -1,0 +1,295 @@
+syntax = "proto3";
+package suiApi;
+
+import "base.proto";
+
+option cc_generic_services = true;
+
+//接口定义
+
+//临时登录
+message tempLoginReq {
+  optional string id = 1;
+}
+
+//响应
+message tempLoginResult {
+  optional string id = 1; //会话id
+}
+
+message tempLoginRsp {
+  optional string id = 1; //服务id
+  optional int32 errorCode = 2;
+  optional string errorMsg = 3;
+  tempLoginResult result = 4;
+}
+
+//会话登录/创建请求
+message sessionLoginReq {
+  optional string requestId = 1; //请求id
+  optional string sessionId = 2; //会话id
+}
+
+//会话登录响应
+message sessionLoginResult {
+  optional bool isGuest = 1; //是否是临时用户
+}
+
+message sessionLoginRsp {
+  optional string id = 1;
+  optional int32 errorCode = 2;
+  optional string errorMsg = 3;
+  sessionLoginResult result = 4;
+}
+
+//验证码服务
+message getEmailCodeReq {
+  optional string id = 1;
+  optional string sessionid = 2;
+  optional string emailNumber = 3;
+}
+
+message getEmailCodeResult {
+  optional string codeId = 1; //验证码id
+}
+
+message getEmailCodeRsp {
+  optional string id = 1;
+  optional int32 errorCode = 2;
+  optional string errorMsg = 3;
+  getEmailCodeResult result = 4;
+}
+
+//短信登录
+message emailNumberLoginReq {
+  optional string id = 1;
+  optional int32 errorCode = 2;
+  optional string errorMsg = 3;
+  optional string emailNumber = 4;
+  optional string verifyCode = 5;
+  optional string emailNumberId = 6;
+}
+
+message emailNumberLoginRsp {
+  optional string id = 1;
+  optional int32 errorCode = 2;
+  optional string errorMsg = 3;
+}
+
+//密码登录
+message passwordLoginReq {
+  optional string id = 1;
+  optional string sessionId = 2;
+  optional string userName = 3;
+  optional string password = 4;
+}
+
+message passwordLoginRsp {
+  optional string id = 1;
+  optional int32 errorCode = 2;
+  optional string errorMsg = 3;
+}
+
+//退出登录
+message logoutReq {
+  optional string id = 1;
+  optional string sessionId = 2;
+}
+
+message logoutResult {
+  optional string sessionId = 1;
+}
+message logoutRsp {
+  optional string id = 1;
+  optional int32 errorCode = 2;
+  optional string errorMsg = 3;
+  logoutResult result = 4;
+}
+
+//设置用户头像
+message setUserAvatarReq {
+  optional string id = 1;
+  optional string sessionId = 2;
+  optional string fileId = 3;
+}
+
+message setUserAvatarRsp {
+  optional string id = 1;
+  optional int32 errorCode = 2;
+  optional string errorMsg = 3;
+}
+
+//设置用户名称
+message setUserNicknameReq {
+  optional string id = 1;
+  optional string sessionId = 2;
+  optional string nickname = 3;
+}
+
+message setUserNicknameRsp {
+  optional string id = 1;
+  optional int32 errorCode = 2;
+  optional string errorMsg = 3;
+}
+
+//设置登录密码
+message setPasswordReq {
+  optional string id = 1;
+  optional string sessionId = 2;
+  optional string password = 3;
+}
+
+message setPasswordRsp {
+  optional string id = 1;
+  optional int32 errorCode = 2;
+  optional string errorMsg = 3;
+}
+
+//设置⽤⼾状态
+message setUserStatusReq {
+  optional string id = 1;
+  optional string sessionId = 2;
+  optional string userId = 3;
+  optional int32 userStatus = 4;
+}
+
+message setUserStatusRsp {
+  optional string id = 1;
+  optional int32 errorCode = 2;
+  optional string errorMsg = 3;
+}
+
+//获取某用户信息
+message userInfoReq {
+  optional string id = 1;
+  optional string sessionId = 2;
+  optional string userId = 3;
+}
+
+message userInfoResult {
+  UserInfo userInfo = 1;
+}
+
+message userInfoRsp {
+  optional string id = 1;
+  optional int32 errorCode = 2;
+  optional string errorMsg = 3;
+  userInfoResult result = 4;
+}
+
+//新增关注
+message newFollowReq {
+  optional string id = 1;
+  optional string sessionId = 2;
+  optional string userId = 3;
+}
+
+message newFollowRsp {
+  optional string id = 1;
+  optional int32 errorCode = 2;
+  optional string errorMsg = 3;
+}
+
+//取消关注
+message DelFollowReq {
+  optional string id = 1;
+  optional string sessionId = 2;
+  optional string userId = 3;
+}
+message DelFollowRsp {
+  optional string id = 1;
+  optional int32 errorCode = 2;
+  optional string errorMsg = 3;
+}
+
+//新增管理员
+message NewAdminReq {
+  optional string id = 1;
+  optional string sessionId = 2;
+  AdminInfo userInfo = 3;
+}
+message NewAdminRsp {
+  optional string id = 1;
+  optional int32 errorCode = 2;
+  optional string errorMsg = 3;
+}
+
+//删除管理员
+message DelAdminReq {
+  optional string id = 1;
+  optional string sessionId = 2;
+  optional string userId = 3;
+}
+message DelAdminRsp {
+  optional string id = 1;
+  optional int32 errorCode = 2;
+  optional string errorMsg = 3;
+}
+
+//编辑管理员信息
+message SetAdminReq {
+  optional string id = 1;
+  optional string sessionId = 2;
+  optional AdminInfo userInfo = 3;
+}
+message SetAdminRsp {
+  optional string id = 1;
+  optional int32 errorCode = 2;
+  optional string errorMsg = 3;
+}
+
+//通过邮箱获取管理员信息
+message GetAdminReq {
+  optional string id = 1;
+  optional string sessionId = 2;
+  optional string email = 3;
+}
+message GetAdminResult {
+  AdminInfo userInfo = 1;
+}
+message GetAdminRsp {
+  optional string id = 1;
+  optional int32 errorCode = 2;
+  optional string errorMsg = 3;
+  GetAdminResult result = 4;
+}
+
+//获取管理员列表
+message GetAdminListReq {
+  optional string id = 1;
+  optional string sessionId = 2;
+  optional int32 pageIndex = 3;
+  optional int32 pageCount = 4;
+  optional int32 userStatus = 5;
+}
+message GetAdminListResult {
+  optional int32 totalCount = 1;
+  repeated AdminInfo userList = 2;
+}
+message GetAdminListRsp {
+  optional string id = 1;
+  optional int32 errorCode = 2;
+  optional string errorMsg = 3;
+  GetAdminListResult result = 4;
+}
+
+service userServices {
+  rpc tempLogin(tempLoginReq) returns (tempLoginRsp);
+  rpc sessionLogin(sessionLoginReq) returns (sessionLoginRsp);
+  rpc getEmailCode(getEmailCodeReq) returns (getEmailCodeRsp);
+  rpc emailCodeLogin(emailNumberLoginReq) returns (emailNumberLoginRsp);
+  rpc passwordLogin(passwordLoginReq) returns (passwordLoginRsp);
+  rpc logout(logoutReq) returns (logoutRsp);
+  rpc setUserAvatar(setUserAvatarReq) returns (setUserAvatarRsp);
+  rpc setUserNickname(setUserNicknameReq) returns (setUserNicknameRsp);
+  rpc setPassword(setPasswordReq) returns (setPasswordRsp);
+  rpc setUserStatus(setUserStatusReq) returns (setUserStatusRsp);
+  rpc getUserInfo(userInfoReq) returns (userInfoRsp);
+  rpc newFollow(newFollowReq) returns (newFollowRsp);
+  rpc DelFollow(DelFollowReq) returns (DelFollowRsp);
+  rpc NewAdmin(NewAdminReq) returns (NewAdminRsp);
+  rpc DelAdmin(DelAdminReq) returns (DelAdminRsp);
+  rpc SetAdmin(SetAdminReq) returns (SetAdminRsp);
+  rpc GetAdmin(GetAdminReq) returns (GetAdminRsp);
+  rpc GetAdminList(GetAdminListReq) returns (GetAdminListRsp);
+}

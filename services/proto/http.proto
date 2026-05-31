@@ -1,0 +1,68 @@
+syntax = "proto3";
+package suiApi;
+
+import "base.proto";
+import "file.proto";
+import "user.proto";
+import "video.proto";
+
+option cc_generic_services = true;
+
+message HttpBody {
+  // 对应 HTTP Header 中的 Content-Type (例如 "video/mp2t", "image/jpeg", "text/html")
+  string content_type = 1;
+  // 对应 HTTP 正文，直接装载纯二进制数据
+  bytes data = 2;
+}
+
+//请求路径: /httpServices/tempLogin
+service httpServices {
+  //用户服务
+  rpc tempLogin(tempLoginReq) returns (tempLoginRsp);
+  rpc sessionLogin(sessionLoginReq) returns (sessionLoginRsp);
+  rpc getEmailCode(getEmailCodeReq) returns (getEmailCodeRsp);
+  rpc emailCodeLogin(emailNumberLoginReq) returns (emailNumberLoginRsp);
+  rpc passwordLogin(passwordLoginReq) returns (passwordLoginRsp);
+  rpc logout(logoutReq) returns (logoutRsp);
+  rpc setUserAvatar(setUserAvatarReq) returns (setUserAvatarRsp);
+  rpc setUserNickname(setUserNicknameReq) returns (setUserNicknameRsp);
+  rpc setPassword(setPasswordReq) returns (setPasswordRsp);
+  rpc setUserStatus(setUserStatusReq) returns (setUserStatusRsp);
+  rpc getUserInfo(userInfoReq) returns (userInfoRsp);
+  rpc newFollow(newFollowReq) returns (newFollowRsp);
+  rpc DelFollow(DelFollowReq) returns (DelFollowRsp);
+  rpc NewAdmin(NewAdminReq) returns (NewAdminRsp);
+  rpc DelAdmin(DelAdminReq) returns (DelAdminRsp);
+  rpc SetAdmin(SetAdminReq) returns (SetAdminRsp);
+  rpc GetAdmin(GetAdminReq) returns (GetAdminRsp);
+  rpc GetAdminList(GetAdminListReq) returns (GetAdminListRsp);
+
+  //文件服务
+  rpc uploadImage(httpUploadImageReq) returns (HttpBody);
+  rpc downloadImage(httpDownloadImageReq) returns (HttpBody);
+
+  rpc initVideoUpload(httpInitVideoUploadReq) returns (HttpBody);
+  rpc uploadVideoPart(httpUploadVideoPartReq) returns (HttpBody);
+  rpc completeVideoUpload(httpCompleteVideoUploadReq) returns (HttpBody);
+
+  rpc getVideoData(httpGetVideoDataReq) returns (HttpBody);
+  rpc downloadVideo(httpDownloadVideoReq) returns (HttpBody);
+
+  //视频接口
+  rpc newVideo(newVideoReq) returns (newVideoRsp);
+  rpc deleteVideo(deleteVideoReq) returns (deleteVideoRsp);
+  rpc isLikeVideo(isLikeVideoReq) returns (isLikeVideoRsp);
+  rpc setLikeVideo(setLikeVideoReq) returns (setLikeVideoRsp);
+  rpc playVideo(playVideoReq) returns (playVideoRsp);
+  rpc addVideoSubtitle(addVideoSubtitleReq) returns (addVideoSubtitleRsp);
+  rpc getVideoSubtitle(getVideoSubtitleReq) returns (getVideoSubtitleRsp);
+  rpc reviewVideo(checkVideoReq) returns (checkVideoRsp);
+  rpc publishVideo(publishVideoReq) returns (publishVideoRsp);
+  rpc removeShelvesVideo(removeShelvesVideoReq) returns (removeShelvesVideoRsp);
+  rpc getUserVideoList(getUserVideoListReq) returns (getUserVideoListRsp);
+  rpc getStatusVideoList(getStatusVideoListReq) returns (getStatusVideoListRsp);
+  rpc getHomeRandomVideoList(getHomeRandomVideoListReq) returns (getHomeRandomVideoListRsp); 
+  rpc getCategoryVideoList(getCategoryVideoListReq) returns (getCategoryVideoListRsp);
+  rpc getTagVideoList(getTagVideoListReq) returns (getTagVideoListRsp);
+  rpc searchVideoList(searchVideoListReq) returns (searchVideoListRsp);
+}

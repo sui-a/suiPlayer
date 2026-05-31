@@ -1,0 +1,2 @@
+/usr/bin/ar qc lib/libsuiScaffold.a CMakeFiles/suiScaffold.dir/src/log.cpp.o CMakeFiles/suiScaffold.dir/src/suiFastdfs.cpp.o CMakeFiles/suiScaffold.dir/src/suiFile.cpp.o CMakeFiles/suiScaffold.dir/src/suiJson.cpp.o CMakeFiles/suiScaffold.dir/src/suiMail.cpp.o CMakeFiles/suiScaffold.dir/src/suiRedis.cpp.o CMakeFiles/suiScaffold.dir/src/suiodb.cpp.o CMakeFiles/suiScaffold.dir/src/suipeg.cpp.o
+/usr/bin/ranlib lib/libsuiScaffold.a

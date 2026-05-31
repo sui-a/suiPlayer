@@ -5,6 +5,7 @@ project(suiScaffold VERSION 1.0)
 
 #添加生成库目标
 file(GLOB_RECURSE suiBaseFiles ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
+
 #定义库
 add_library(${PROJECT_NAME} STATIC ${suiBaseFiles})   # 或 SHARED
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)

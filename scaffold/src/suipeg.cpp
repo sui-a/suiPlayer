@@ -1,6 +1,6 @@
 #include "suipeg.hpp"
 
-namespace sui
+namespace suiPeg
 {
     M3U8Info::M3U8Info(std::string name)
         :_filename(name)
@@ -11,7 +11,7 @@ namespace sui
     bool M3U8Info::parse()
     {
         std::string context;
-        bool rel = sui::suiFile::read(_filename, context);
+        bool rel = suiFile::suiFiler::read(_filename, context);
         if(rel == false)
             return false;
 
@@ -30,7 +30,7 @@ namespace sui
                 << it.second << "\n";
         context << "#EXT-X-ENDLIST\n";
 
-        bool rel = sui::suiFile::write(_filename, context.str());
+        bool rel = suiFile::suiFiler::write(_filename, context.str());
         return true;
     }
     std::vector<std::string>& M3U8Info::headers()

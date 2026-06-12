@@ -13,7 +13,7 @@ extern "C" {
 #include "suiFile.hpp"
 
 
-namespace sui
+namespace suiPeg
 {
     class M3U8Info
     {

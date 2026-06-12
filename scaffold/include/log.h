@@ -22,7 +22,10 @@ namespace suiUtil
     };
 
     //初始化接口
-    extern void suiLogInit(const logSetting& settings);
+    void suiLogInit(const logSetting& settings);
+    //默认初始化接口
+    void suiLogInitDefault();
+
 
     //定义日志输出宏
     #define DEBUG(fmt, ...) suiUtil::logger->debug(std::string("[{}][{}]: ") + fmt, __FILE__, __LINE__, ##__VA_ARGS__)

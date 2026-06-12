@@ -1,10 +1,11 @@
 #pragma once
+#include <odb/schema-catalog.hxx>
 #include <odb/database.hxx>
 #include <odb/mysql/transaction.hxx>
 #include <odb/mysql/database.hxx>
 #include <string>
 
-namespace sui
+namespace suiOdb
 {
     struct odbSetting
     {

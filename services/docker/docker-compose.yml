@@ -1,0 +1,27 @@
+version: '3.8'  # 指定兼容的 Compose 规范版本
+
+services:        # 服务定义区块
+  sui-redis:        # 服务名称（自定义）
+    image: redis:7.4-alpine  # 镜像
+    container_name: suiRedis  # 容器名称
+    command: redis-server --bind 0.0.0.0 --port 6379 --appendonly yes --requirepass "suisuipingan" --user defaule on +@all >"suisuipingan"
+    ports:
+      - "8081:6379"
+    networks:
+      - suiNetwork   # 加入指定网络
+  sui-mq:
+    image: rabbitmq:3.9-management-alpine
+    container_name: suiMQ
+    environment:
+      - RABBITMQ_DEFAULT_USER=sui      # 自定义账号
+      - RABBITMQ_DEFAULT_PASS=suisuipingan   # 自定义密码
+    ports:
+      - "8082:5672"
+      - "8083:15672"
+    networks:
+      - suiNetwork   # 加入指定网络
+
+# 定义网络
+networks:  # 自定义网络（隔离通信）
+  suiNetwork:
+    driver: bridge  # 桥接模式

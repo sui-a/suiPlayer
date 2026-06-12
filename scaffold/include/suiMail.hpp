@@ -4,7 +4,7 @@
 #include <sstream>
 #include <curl/curl.h>
 
-namespace sui
+namespace suiMail
 {
     struct MailSetting
     {

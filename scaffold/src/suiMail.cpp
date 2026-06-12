@@ -1,6 +1,6 @@
 #include "suiMail.hpp"
 
-namespace sui
+namespace suiMail
 {
     suiMailClient::suiMailClient(const MailSetting& setting, const std::string& title)
         : _setting(setting)

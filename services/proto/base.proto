@@ -86,6 +86,7 @@ message FileInfo {
   optional string fileMime = 2;
   optional bytes fileData = 3;
   optional string usrId = 4;
+  optional int32 fileSize = 5;
 }
 
 //视频信息

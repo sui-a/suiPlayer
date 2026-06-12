@@ -1,7 +1,7 @@
 #include "suiFile.hpp"
 
 
-bool sui::suiFile::read(const std::string& filename, std::string& body)
+bool suiFile::suiFiler::read(const std::string& filename, std::string& body)
 {
     std::ifstream ifs;
     //以二进制读形式打开
@@ -28,7 +28,7 @@ bool sui::suiFile::read(const std::string& filename, std::string& body)
     return true;
 }
 
-bool sui::suiFile::write(const std::string& filename, const std::string& body)
+bool suiFile::suiFiler::write(const std::string& filename, const std::string& body)
 {
     std::ofstream ofs;
     //以二进制截断写形式打开

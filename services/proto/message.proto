@@ -1,0 +1,13 @@
+syntax = "proto3";
+package suiApi;
+
+option cc_generic_services = true;
+
+//删除缓存
+message DeleteCacheMsg {
+  repeated string key = 1;
+}
+
+message DeleteFileMsg {
+  repeated string fileId = 1;
+}

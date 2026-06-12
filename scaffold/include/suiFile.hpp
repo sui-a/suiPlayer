@@ -1,11 +1,12 @@
+#pragma once 
 #include <fstream>
 #include <iostream>
 #include <string>
 
 
-namespace sui
+namespace suiFile
 {
-    class suiFile
+    class suiFiler
     {
     public:
         static bool read(const std::string& filename, std::string& body);

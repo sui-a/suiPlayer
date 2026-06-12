@@ -24,6 +24,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake) #声明依赖子模块位置
 include(FindDepends)
 find_my_depends()
+add_my_depends()
 
 #开始安装头文件
 install(

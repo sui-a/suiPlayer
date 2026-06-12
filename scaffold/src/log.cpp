@@ -41,4 +41,14 @@ namespace suiUtil
         //设置日志格式
         logger->set_pattern(settings.format);
     }
+
+    void suiLogInitDefault()
+    {
+        suiUtil::logSetting settings;
+        settings.async = true;
+        settings.path = "stdout";
+        settings.level = 1;
+        settings.format = "%Y-%m-%d %H:%M:%S %e [%l] %v";
+        suiUtil::suiLogInit(settings);
+    }
 }

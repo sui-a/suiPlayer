@@ -45,11 +45,12 @@ enum visitorType {
 //视频状态
 enum videoStatus {
   videoStatusUnknow = 0; //未知
-  videoStatusPendingReview = 1; //待审核
-  videoStatusApproved = 2; //被认可
-  videoStatusReject = 3; //被驳回
-  videoStatusRemove = 4; //下架
-  videoStatusTranscoding = 5; //转码中
+  videoStatusUpload = 1; //处于正在上传状态
+  videoStatusPendingReview = 2; //待审核
+  videoStatusApproved = 3; //被认可
+  videoStatusReject = 4; //被驳回
+  videoStatusRemove = 5; //下架
+  videoStatusTranscoding = 6; //转码中
 }
 
 //用户信息
@@ -67,7 +68,7 @@ message UserInfo {
   optional followStatus isFollowing = 11; //是否关注
   optional string userMemo = 12; //备注信息
   optional string userCTime = 13; //创建时间
-  optional string avatarFileId = 14;  //头像文件
+  optional string avatarFileId = 14; //头像文件
 }
 
 //管理员信息
@@ -77,7 +78,7 @@ message AdminInfo {
   optional roleType role = 3; //角色类型
   optional userStatus status = 4; //用户状态
   optional string userMemo = 5; //备注信息
-  optional string email = 6;  //绑定邮箱
+  optional string email = 6; //绑定邮箱
 }
 
 //文件信息
@@ -91,25 +92,25 @@ message FileInfo {
 
 //视频信息
 message VideoInfo {
-  optional string videoId = 1;          // 视频ID
-  optional string userId = 2;           // 用户ID
-  optional string userAvatarId = 3;     // 用户头像ID
-  optional string nickname = 4;         // 用户昵称
-  optional int32 videoType = 5;         // 视频类型
-  repeated int32 videoTag = 6;          // 视频标签（可重复多个）
-  optional string videoFileId = 7;      // 视频文件ID
-  optional string photoFileId = 8;      // 封面图片文件ID
-  optional int32 likeCount = 9;         // 点赞数
-  optional int32 playCount = 10;        // 播放数
-  optional int32 videoSize = 11;        // 视频大小
-  optional string videoDesc = 12;       // 视频描述
-  optional string videoTitle = 13;      // 视频标题
-  optional int32 videoDuration = 14;    // 视频时长
-  optional string videoUpTime = 15;     // 视频上传时间
-  optional string checkerId = 16;       // 审核员ID
-  optional string checkerName = 17;     // 审核员名字
-  optional string checkerAvatar = 18;   // 审核员头像
-  optional videoStatus Status = 19;// 视频状态
+  optional string videoId = 1; // 视频ID
+  optional string userId = 2; // 用户ID
+  optional string userAvatarId = 3; // 用户头像ID
+  optional string nickname = 4; // 用户昵称
+  optional int32 videoType = 5; // 视频类型
+  repeated int32 videoTag = 6; // 视频标签（可重复多个）
+  optional string videoFileId = 7; // 视频文件ID
+  optional string photoFileId = 8; // 封面图片文件ID
+  optional int32 likeCount = 9; // 点赞数
+  optional int32 playCount = 10; // 播放数
+  optional int32 videoSize = 11; // 视频大小
+  optional string videoDesc = 12; // 视频描述
+  optional string videoTitle = 13; // 视频标题
+  optional int32 videoDuration = 14; // 视频时长
+  optional string videoUpTime = 15; // 视频上传时间
+  optional string checkerId = 16; // 审核员ID
+  optional string checkerName = 17; // 审核员名字
+  optional string checkerAvatar = 18; // 审核员头像
+  optional videoStatus Status = 19; // 视频状态
 }
 
 //弹幕信息
@@ -120,5 +121,3 @@ message VideoSubtitleInfo {
   optional string subtitle = 5; // 弹幕内容
   optional int64 subtitleTime = 6; // 弹幕时间
 }
-
-

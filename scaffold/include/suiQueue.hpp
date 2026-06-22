@@ -15,11 +15,12 @@ namespace suiQueue
     struct queueSetting
     {
     public:
-        std::string exchange;
+        std::string exchange; //交换机名称
         //交换机类型： direct, fanout, headers, topic, delayed
-        std::string exchangeType;
-        std::string queue;
-        std::string bindKey;
+        std::string exchangeType;  
+        std::string queue;  //队列名称
+        std::string bindKey; //绑定键
+        //消息过期时间，单位：毫秒
         size_t ttl;
 
         std::string dlxExchange() const;

@@ -117,7 +117,7 @@ namespace suiQueue
         AMQP::ExchangeType type = getExchangeType(s.exchangeType);
         _channel.declareExchange(exchange, type).onSuccess([this, queue, bindKey, exchange, args]()->void{
             //声明成功，开始声明交换队列
-            this->_channel.declareQueue(queue, AMQP::durable, args).onSuccess([this, queue, bindKey,exchange](){
+            this->_channel.declareQueue(queue, AMQP::durable, args).onSuccess([this, queue, bindKey, exchange](){
                 //开始绑定交换机与队列
                 _channel.bindQueue(exchange, queue, bindKey).onSuccess([this](){
                     //成功

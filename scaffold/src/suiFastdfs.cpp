@@ -2,7 +2,7 @@
 #include <mutex>
 #include "suiFastdfs.hpp"
 
-namespace sui
+namespace suifd
 {
     FastdfsSetting suiFastdfs::_setting = FastdfsSetting();
     static std::mutex Fastdfs_mutex;
@@ -80,7 +80,6 @@ namespace sui
         auto tracker_connection = tracker_get_connection();
         if(tracker_connection == nullptr)
             return std::string("获取tracker服务器连接失败");
-        std::cout << "1" << std::endl;
         int64_t file_size = 0;
         auto ret = storage_download_file_to_file1(tracker_connection, nullptr, file_id.c_str(), filepath.c_str(), &file_size);
         if (ret != 0)
@@ -124,13 +123,10 @@ namespace sui
         char group[256];
         auto ret = storage_upload_by_filebuff1(tracker_connection, nullptr, 0,  buff.c_str(), buff.size(), nullptr, nullptr, 0, nullptr, id); //返回有问题
         
-        std::cout << "id:  " << *id << std::endl;
         if(ret != 0)
             return STRERROR(ret);
 
         file_id = id;
-        std::cout << "id: " << file_id << std::endl;
-        std::cout << "组是： " << group << std::endl;
         tracker_close_connection(tracker_connection);
         return std::nullopt;
         
@@ -153,5 +149,131 @@ namespace sui
         return std::nullopt;
     }
 
-    
+    std::optional<std::string> suiFastdfs::upload_appender_frist_from_buff(std::string& buff, std::string& file_id) 
+    {
+        auto tracker_connection = tracker_get_connection();
+        if (tracker_connection == nullptr) {
+            return "获取tracker服务器连接失败";
+        }
+
+        char file_id_buff[256];
+        memset(file_id_buff, 0, 256);
+
+        // 调用底层 _by_filebuff1 接口
+        auto ret = storage_upload_appender_by_filebuff1(
+            tracker_connection, 
+            nullptr,            // storage server, 传 nullptr 由内部自动获取
+            0,                  // store_path_index
+            buff.c_str(),       // file_buff: 内存首地址
+            buff.size(),        // file_size: 内存块大小
+            nullptr,                // file_ext_name: 扩展名
+            nullptr,            // meta_list
+            0,                  // meta_count
+            nullptr,            // group_name
+            file_id_buff        // [out] 返回的 file_id
+        );
+
+        if (ret != 0) {
+            tracker_close_connection(tracker_connection); // 注意：错误返回前必须释放连接
+            return STRERROR(ret);
+        }
+
+        file_id = file_id_buff; // 赋值传出
+        tracker_close_connection(tracker_connection);
+        return std::nullopt;
+    }
+
+    std::optional<std::string> suiFastdfs::upload_appender_from_buff(const std::string& file_id, std::string& buff) 
+    {
+        auto tracker_connection = tracker_get_connection();
+        if (tracker_connection == nullptr) {
+            return "获取tracker服务器连接失败";
+        }
+
+        // 调用 append 接口将内存直接追加到 FastDFS
+        auto ret = storage_append_by_filebuff1(
+            tracker_connection, 
+            nullptr,            // storage server
+            buff.c_str(),               // file_buff: 内存首地址
+            buff.size(),          // file_size: 内存块大小
+            file_id.c_str()    // 目标 appender file_id
+        );
+
+        if (ret != 0) {
+            tracker_close_connection(tracker_connection); // 错误返回前释放连接
+            return STRERROR(ret);
+        }
+
+        tracker_close_connection(tracker_connection);
+        return std::nullopt;
+    }
+    std::optional<std::string> suiFastdfs::download_chunk_to_buff(
+            const std::string& file_id, 
+            int64_t file_offset, 
+            int64_t request_size, 
+            std::string& out_buff) 
+    {
+        auto tracker_connection = tracker_get_connection();
+        if (tracker_connection == nullptr)
+            return "获取tracker服务器连接失败";
+
+        // 1. 获取文件信息，用于计算剩余大小和防越界
+        FDFSFileInfo file_info;
+        int ret = fdfs_get_file_info1(file_id.c_str(), &file_info);
+        if (ret != 0) 
+        {
+            tracker_close_connection(tracker_connection);
+            return STRERROR(ret);
+        }
+
+        int64_t total_size = file_info.file_size;
+        int64_t remain_size = total_size - file_offset;
+
+        // 2. 检查偏移量是否已经超出文件范围
+        if (remain_size <= 0) {
+            out_buff.clear(); // 偏移量超出，返回空数据
+            tracker_close_connection(tracker_connection);
+            return std::nullopt; // 这不算API执行错误，直接返回成功状态即可
+        }
+
+        // 3. 核心截断逻辑：如果剩余量小于请求量，只下载剩余量
+        int64_t final_download_bytes = (remain_size < request_size) ? remain_size : request_size;
+
+        // 4. 准备接收数据的缓冲区
+        out_buff.clear();
+        out_buff.reserve(final_download_bytes); // 预分配内存，避免下载过程中多次扩容影响性能
+        
+        DownloadContext ctx;
+        ctx.buffer = &out_buff;
+
+        int64_t out_file_size = 0;
+
+        // 5. 调用 ex1 接口执行精准下载
+        ret = storage_download_file_ex1(
+            tracker_connection, 
+            nullptr,                // storage server, 传 nullptr 让 API 内部自动查询
+            file_id.c_str(), 
+            file_offset, 
+            final_download_bytes,   // 传入修正后的精准大小
+            chunk_download_callback, 
+            &ctx, 
+            &out_file_size
+        );
+
+        if (ret != 0) {
+            tracker_close_connection(tracker_connection); // 错误返回前释放连接
+            return STRERROR(ret);
+        }
+
+        tracker_close_connection(tracker_connection);
+        return std::nullopt;
+    }
+
+    extern "C" int chunk_download_callback(void* arg, int64_t file_size, const char* block_buff, int block_bytes) 
+    {
+        auto* ctx = static_cast<DownloadContext*>(arg);
+        // 将下载到的数据块追加到 std::string 容器中
+        ctx->buffer->append(block_buff, block_bytes);
+        return 0;
+    }
 }

@@ -5,7 +5,8 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "/usr/include",
-                "/usr/local/include"
+                "/usr/local/include",
+                "${workspaceFolder}/**"
             ],
             "defines": [],
             // 核心修改：必须把 gcc 改为 g++，否则无法正确解析 C++ 头文件

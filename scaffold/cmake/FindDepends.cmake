@@ -1,15 +1,14 @@
 # 定义变量，保存所有需要查找的库的名称
-set(libs jsoncpp protobuf spdlog
-    ev amqpcpp pthread brpc leveldb dl
-    ssl crypto gflags cpr elasticlient
-    cpprest etcd-cpp-api fdfsclient
-    fastcommon avcodec avformat gtest
-    curl odb-mysql odb odb-boost
-    hiredis fmt redis++
+set(libs jsoncpp spdlog ev amqpcpp pthread brpc leveldb dl
+    gflags cpr elasticlient cpprest fdfsclient fastcommon 
+    avcodec avformat gtest curl odb-mysql odb odb-boost 
+    hiredis fmt redis++ etcd-cpp-api grpc++ 
+    grpc  gpr protobuf 
+    ssl crypto z
 )
 
 macro(find_libraries lib) 
-    find_library(${lib}_LIBRARY ${lib} PATHS /usr/lib /usr/lib/x86_64-linux-gnu /usr/local/lib)
+    find_library(${lib}_LIBRARY ${lib} PATHS /usr/lib /usr/lib/x86_64-linux-gnu /usr/local/lib )
     if(${lib}_LIBRARY)
         set(${lib}_FOUND TRUE)
     else()

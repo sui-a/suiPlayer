@@ -70,7 +70,7 @@ namespace suiFileService
 
         //构建odb数据对象
         suiDataSql::suiFileMeta fileMeta(fileId, curUserId.value(), filePath, curFile.filesize(), curFile.filemime());
-        fileMeta.setFileStatus(suiDataSql::fileStatus::fileStatusUnknow);
+        fileMeta.setFileStatus(suiDataSql::fileStatus::fileStatusSuccess);
         //添加进数据库
         _fileMetaServicePtr->newFileMeta(fileMeta);
 
@@ -365,7 +365,7 @@ namespace suiFileService
             response->set_id(serviceId);
             return;
         }
-        if(fileMeta->getFileStatus() != suiDataSql::fileStatus::fileStatusUpload)
+        if(fileMeta->getFileStatus() != suiDataSql::fileStatus::fileStatusUploading)
         {
             //文件状态不对
             ERROR("会话id: {} 请求上传文件失败, 错误： {}", sessionId, "文件状态不对");

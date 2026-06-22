@@ -1,10 +1,48 @@
 #include "suiSerSearch.hpp"
 
-namespace suiEtcd
+namespace sui
 {
+    std::string RandomUtil::uuid(RandomUtil::UuidType type, size_t length)
+    {
+        static const std::string digitArray = "0123456789";
+        static const std::string charArray = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        static const std::string allArray = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        static std::atomic<unsigned int> counter(0);
+        std::string result;
+        const std::string* arrayPtr = nullptr;
+        if(type == UuidType::DIGIT)
+            arrayPtr = &digitArray;
+        else if(type == UuidType::ALPHA)
+            arrayPtr = &charArray;
+        else
+            arrayPtr = &allArray;
+
+        //获取机器级随机数
+        std::random_device rd;
+        size_t seed = rd();
+        //创建随机数引擎
+        std::mt19937 gen(seed);
+        for(size_t i = 0; i < length; i++)
+        {
+            //生成伪随机uid
+            int index = (gen()) % (arrayPtr->size());
+            result += ((*arrayPtr)[index]);
+        }
+
+        unsigned int val = counter.load(); // 原子读取
+        // 将计数器转换为字符串并追加到结果中
+        std::ostringstream oss;
+        oss << std::setw(4) << std::setfill('0') << val;
+        result += oss.str();
+        counter++;
+        std::cout << "生成UUID: " << result << std::endl;
+        return result;
+    }
+
+
     serProvider::serProvider(const std::string &serName, const std::string addr)
         : _addr(addr)
-        , _id(suiRandom::RandomUtil::uuid())
+        , _id(RandomUtil::uuid())
         , _serName(serName)
     {
 
@@ -18,12 +56,7 @@ namespace suiEtcd
         return "/" + _serName + "/" + _id;
     }
 
-    void serProvider::setSerAddr(const std::string &serAddr)
-    {
-        _serAddr = serAddr;
-    }
-
-    void serProvider::redister()
+    void serProvider::redister(const std::string &serAddr)
     {
         //初始化客户端对象
         etcd::Client client(_addr);
@@ -42,17 +75,17 @@ namespace suiEtcd
         //获取租约id
         auto lease_id = lease_resp.value().lease();
         // 2. 使用租约设置键值对
-        auto put_resp = client.put(key, _serAddr, lease_id).get();
+        auto put_resp = client.put(key, serAddr, lease_id).get();
         if (!put_resp.is_ok()) 
         {
             //设置键值对失败
             return;
         }
-        INFO("服务注册成功: {} -> {}", key, _serAddr);
-        _keepAlive.reset(new etcd::KeepAlive(_addr, [this](std::exception_ptr ex) {
-                std::thread threads([this](){
-                    ERROR("KeepAlive发生异常，正在重新注册服务...");
-                    this->redister(); 
+        std::cout << "服务注册成功: " << key << " -> " << serAddr << std::endl;
+        _keepAlive.reset(new etcd::KeepAlive(_addr, [serAddr, this](std::exception_ptr ex) {
+                std::thread threads([serAddr, this](){
+                    std::cout << "KeepAlive发生异常，正在重新注册服务..." << std::endl;
+                    this->redister(serAddr); 
                 });
                 threads.detach();
             }, 3, lease_id));
@@ -62,12 +95,10 @@ namespace suiEtcd
 
     void serProvider::waitConnect(etcd::Client& client)
     {
-        INFO("等待连接etcd...");
         while(client.head().get().is_ok() == false)
         {
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }
-        INFO("连接etcd成功");
     }
 
     void serSearch::waitConnect(etcd::Client& client)
@@ -119,7 +150,7 @@ namespace suiEtcd
         //开始创建监视器
         std::string key = "/" + _serName;
         
-        ERROR("开始监控服务变化: {}", key);
+        std::cout << "开始监控服务变化: " << key << std::endl;
         _watcher.reset(new etcd::Watcher(_addr, key, [this](const etcd::Response& resp) {
             this->callback(resp);
         }, true));
@@ -147,23 +178,9 @@ namespace suiEtcd
         }
 
         auto events = resp.events();
+        std::cout << "收到事件: " << events.size() << std::endl;
         for(auto& it : events)
         {
-            std::string curEventType;
-            switch (it.event_type())
-            {
-                case etcd::Event::EventType::PUT:
-                    curEventType = "新增";
-                    break;
-                case etcd::Event::EventType::DELETE_:
-                    curEventType = "删除";
-                    break;
-                default:
-                    curEventType = "异常";
-                    break;
-            };
-
-            INFO("收到事件: {}, key: {} :  value: {}", curEventType, it.kv().key(), it.kv().as_string());
             if(it.event_type() == etcd::Event::EventType::PUT)
             {
                 //数据改变
@@ -179,6 +196,10 @@ namespace suiEtcd
                 std::string serAddr = it.prev_kv().as_string();
                 if(_offline)
                     _offline(serName, serAddr);
+            }
+            else
+            {
+                //无效事件
             }
         }
         //

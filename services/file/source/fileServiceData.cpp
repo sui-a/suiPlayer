@@ -18,7 +18,7 @@ namespace suiFileService
             auto& dbHandler = t.database();
             auto rtx = _redis->transaction(false, false);
             auto rehandler = rtx.redis();
-            suiSession::sessionData sedata(dbHandler, rehandler,  _removeCache);
+            suiSession::sessionData sedata(dbHandler, rehandler, _removeCache);
             auto session = sedata.selectBySessionId(session_id);
             t.commit();
             if (session == nullptr || session->getUserId().null())

@@ -84,12 +84,13 @@ find_package(suiScaffold REQUIRED)
 file(GLOB ABSL_LIBS "/usr/local/lib/libabsl_*.a" "/usr/lib/x86_64-linux-gnu/libabsl_*.a")
 
 #添加依赖库
-set(libs jsoncpp spdlog ev amqpcpp pthread brpc leveldb dl
-    gflags cpr elasticlient cpprest fdfsclient fastcommon 
-    avcodec avformat gtest curl odb-mysql odb odb-boost 
-    hiredis fmt redis++ etcd-cpp-api grpc++ 
-    grpc gpr protobuf 
-    ssl crypto z
+set(libs jsoncpp protobuf spdlog
+    ev amqpcpp pthread brpc leveldb dl
+    ssl crypto gflags cpr elasticlient
+    cpprest etcd-cpp-api fdfsclient
+    fastcommon avcodec avformat gtest
+    curl odb-mysql odb odb-boost
+    hiredis fmt redis++
 )
 
 #添加头文件目录

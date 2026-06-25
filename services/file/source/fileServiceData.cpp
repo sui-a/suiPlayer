@@ -20,9 +20,18 @@ namespace suiFileService
             auto rehandler = rtx.redis();
             suiSession::sessionData sedata(dbHandler, rehandler, _removeCache);
             auto session = sedata.selectBySessionId(session_id);
+            //INFO("查询的会话id: {}", session_id);
             t.commit();
-            if (session == nullptr || session->getUserId().null())
+            if (session == nullptr)
+            {
+                ERROR("会话id: {} 不存在", session_id);
                 return std::nullopt; //为空或者用户id为空直接返回
+            }
+            if(session->getUserId().null())
+            {
+                ERROR("会话id: {} 用户id为空", session_id);
+                return std::nullopt; //为空或者用户id为空直接返回   
+            }
             return session->getUserId().get();
         }
         catch (const odb::exception& e)

@@ -146,7 +146,7 @@ namespace suiDataSql
 
     std::string suiFileMeta::getUploadTimeString() const
     {
-        if (_upload_time == 0) return "";
+        if (_upload_time == 0) return "0";
 
         time_t time_val = static_cast<time_t>(_upload_time);
         struct tm *tm_info = localtime(&time_val);

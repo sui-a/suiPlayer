@@ -125,7 +125,7 @@ namespace suifd
         
         if(ret != 0)
             return STRERROR(ret);
-
+        
         file_id = id;
         tracker_close_connection(tracker_connection);
         return std::nullopt;
@@ -138,13 +138,17 @@ namespace suifd
         if(tracker_connection == nullptr)
             return std::string("获取tracker服务器连接失败");
         
-        char *buff_ptr = nullptr;
+        
+        char* buff_ptr = nullptr;
         int64_t buff_size = 0;
         auto ret = storage_download_file_to_buff1(tracker_connection, nullptr, file_id.c_str(), &buff_ptr, &buff_size);
         if(ret != 0)
             return STRERROR(ret);
-
-        buff = buff_ptr;
+        if(buff_size != 0)
+        {
+            buff = std::string(buff_ptr, buff_size);
+            free(buff_ptr);
+        }
         tracker_close_connection(tracker_connection);
         return std::nullopt;
     }

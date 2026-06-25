@@ -24,6 +24,7 @@ namespace suiEtcd
         void setSerAddr(const std::string &serAddr);
         void redister();
 
+        std::string getKey();
 
     private:
         std::string _addr; //注册中心地址

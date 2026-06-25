@@ -25,5 +25,12 @@ namespace suiRedis
         static std::shared_ptr<sw::redis::Redis> create(const redisSettings& setting);
     };
 
+
+#undef REDIS_REPLY_STRING
+#undef REDIS_REPLY_ARRAY
+#undef REDIS_REPLY_INTEGER
+#undef REDIS_REPLY_NIL
+#undef REDIS_REPLY_STATUS
+#undef REDIS_REPLY_ERROR
     
 }

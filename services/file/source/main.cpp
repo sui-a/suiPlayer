@@ -35,9 +35,6 @@ DEFINE_string(file_server_remove_queue, "file_remove_queue", "文件删除队列
 DEFINE_string(file_server_remove_bind_key, "file_remove_key", "文件删除队列绑定键");
 
 
-
-
-
 int main(int argc, char* argv[])
 {
     //初始化日志

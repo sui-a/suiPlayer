@@ -2,16 +2,15 @@
 #include <string>
 #include <optional>
 #include <memory>
-
 extern "C" {
     #include <fastcommon/logger.h>
     #include <fastdfs/fdfs_client.h>
 }
-
 #ifdef byte
   #undef byte
 #endif
 
+#include "log.h"
 
 namespace suifd
 {

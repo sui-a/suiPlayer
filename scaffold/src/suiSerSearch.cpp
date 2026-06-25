@@ -58,6 +58,11 @@ namespace suiEtcd
             }, 3, lease_id));
         //启动keepAlive线程
     }
+
+    std::string serProvider::getKey()
+    {
+        return makeKey();
+    }
     
 
     void serProvider::waitConnect(etcd::Client& client)
@@ -119,7 +124,7 @@ namespace suiEtcd
         //开始创建监视器
         std::string key = "/" + _serName;
         
-        ERROR("开始监控服务变化: {}", key);
+        INFO("开始监控服务变化: {}", key);
         _watcher.reset(new etcd::Watcher(_addr, key, [this](const etcd::Response& resp) {
             this->callback(resp);
         }, true));
@@ -163,7 +168,7 @@ namespace suiEtcd
                     break;
             };
 
-            INFO("收到事件: {}, key: {} :  value: {}", curEventType, it.kv().key(), it.kv().as_string());
+            //INFO("收到事件: {}, key: {} :  value: {}", curEventType, it.kv().key(), it.kv().as_string());
             if(it.event_type() == etcd::Event::EventType::PUT)
             {
                 //数据改变

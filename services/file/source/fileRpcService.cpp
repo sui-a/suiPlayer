@@ -32,6 +32,7 @@ namespace suiFileService
             //为空
             //用户数据为空，说明临时用户，无权限
             ERROR("会话id: {} 请求上传图像失败, 错误： {}", sessionId, "无上传权限");
+            ERROR("用户数据为空");
             response->set_errorcode(suiErrorCodeDef::ERR_FILE_SERVICE_UPLOAD_USER_NO_PERMISSION);
             response->set_errormsg("无上传权限");
             response->set_id(serviceId);
@@ -94,6 +95,7 @@ namespace suiFileService
         std::string sessionId = request->sessionid();
         std::string serviceId = request->id();
         std::string fileId = request->fileid();
+        INFO("下载图像请求，文件id为： {}", fileId);
 
         //验证权限
         auto curUserId = _fileMetaServicePtr->getSessionUser(sessionId);
@@ -145,6 +147,7 @@ namespace suiFileService
         //开始获取图像数据
         std::string filePathData = filePath.get();
         std::string fileData;
+        INFO("图像路径为： {}", filePathData);
         auto downloadErrorResult = suifd::suiFastdfs::download_to_buff(filePathData, fileData);
         if(downloadErrorResult.has_value())
         {
@@ -155,7 +158,8 @@ namespace suiFileService
             response->set_id(serviceId);
             return;
         }
-
+        INFO("成功获取到数据");
+        
         //下载成功
         //构建返回消息
         response->set_errorcode(suiErrorCodeDef::SUCCESS);

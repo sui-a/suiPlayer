@@ -1,7 +1,0 @@
-/home/sui/suiPlayer/scaffold/build/CMakeFiles/suiScaffold.dir
-/home/sui/suiPlayer/scaffold/build/CMakeFiles/edit_cache.dir
-/home/sui/suiPlayer/scaffold/build/CMakeFiles/rebuild_cache.dir
-/home/sui/suiPlayer/scaffold/build/CMakeFiles/list_install_components.dir
-/home/sui/suiPlayer/scaffold/build/CMakeFiles/install.dir
-/home/sui/suiPlayer/scaffold/build/CMakeFiles/install/local.dir
-/home/sui/suiPlayer/scaffold/build/CMakeFiles/install/strip.dir

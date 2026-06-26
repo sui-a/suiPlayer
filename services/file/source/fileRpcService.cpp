@@ -21,6 +21,7 @@ namespace suiFileService
         ::google::protobuf::Closure* done)
     {
         brpc::ClosureGuard doneGuard(done);
+        (void)controller;
         
         //验证权限
         std::string sessionId = request->sessionid();
@@ -90,6 +91,7 @@ namespace suiFileService
         ::google::protobuf::Closure* done)
     {
         brpc::ClosureGuard doneGuard(done);
+        (void)controller;
 
         //获取请求信息
         std::string sessionId = request->sessionid();
@@ -158,7 +160,6 @@ namespace suiFileService
             response->set_id(serviceId);
             return;
         }
-        INFO("成功获取到数据");
         
         //下载成功
         //构建返回消息
@@ -182,7 +183,7 @@ namespace suiFileService
         ::google::protobuf::Closure* done)
     {
         brpc::ClosureGuard doneGuard(done);
-
+        (void)controller;
         //获取请求信息
         std::string sessionId = request->sessionid();
         std::string serviceId = request->id();
@@ -207,7 +208,6 @@ namespace suiFileService
         int32_t fileSize = param.filesize();
         const std::string& filemime = param.filemime();
         std::string uploadId = param.uploadid();
-        std::string filePath = param.filepath();
         int32_t chunkTotal = param.chunktotal();
         int32_t chunkIndex = param.chunkindex();
 
@@ -221,12 +221,12 @@ namespace suiFileService
             response->set_id(serviceId);
             return;
         }
-
         if(fileId.empty())
         {
             if(chunkIndex != 0)
             {
                 //索引不对
+                ERROR("会话id: {} 请求上传文件失败, 错误： {}, 要求序号为0，当前序号为: {}", sessionId, "上传分片的序号不对", chunkIndex);
                 response->set_errorcode(suiErrorCodeDef::ERR_FILE_SERVICE_UPLOAD_CHUNK_INDEX_INVALID);
                 response->set_id(serviceId);
                 response->set_errormsg("上传分片的序号不对");
@@ -248,6 +248,7 @@ namespace suiFileService
             createFileId(fileId);
 
             //开始上传
+            std::string filePath;
             auto uploadResult = suifd::suiFastdfs::upload_appender_frist_from_buff(data, filePath);
             if(uploadResult.has_value())
             {
@@ -261,6 +262,7 @@ namespace suiFileService
             //添加数据库
             //构建odb数据对象
             suiDataSql::suiFileMeta fileMeta(fileId, curUserId.value(), filePath, fileSize, filemime);
+            fileMeta.setFileStatus(suiDataSql::fileStatus::fileStatusUploading);
             //添加进数据库
             _fileMetaServicePtr->newFileMeta(fileMeta);
 
@@ -284,12 +286,14 @@ namespace suiFileService
         }
         //追加
         //验证操作存在和顺序性
+        
         if(_fileTrackerMap.find(uploadId) == _fileTrackerMap.end())
         {
             //说明操作不存在
             response->set_errorcode(suiErrorCodeDef::ERR_FILE_SERVICE_UPLOAD_ID_INVALID);
             response->set_id(serviceId);
             response->set_errormsg("上传id失效");
+            ERROR("会话id: {} 请求上传文件失败, 错误： {}", sessionId, "上传id失效");
             return;
         }
         //
@@ -297,16 +301,38 @@ namespace suiFileService
         if(chunkIndex != tarckerIt.getChunkIndex())
         {
             //索引不对
+            ERROR("会话id: {} 请求上传文件失败, 错误： {}, 上传序号：{}， 当前需求序号：{}", sessionId, "上传分片的序号不对", chunkIndex, tarckerIt.getChunkIndex());
             response->set_errorcode(suiErrorCodeDef::ERR_FILE_SERVICE_UPLOAD_CHUNK_INDEX_INVALID);
             response->set_id(serviceId);
             response->set_errormsg("上传分片的序号不对");
             auto rspResult = response->mutable_result();
-            rspResult->set_curoperationsize(0);
+            rspResult->set_curoperationsize(tarckerIt.getChunkIndex());
             return;
         }
-
+        std::string filePath;
+        //通过文件id查询文件路径
+        auto fileMeta = _fileMetaServicePtr->getFileMeta(fileId);
+        if(!fileMeta)
+        {
+            //文件不存在
+            response->set_errorcode(suiErrorCodeDef::ERR_FILE_SERVICE_FILE_NOT_FOUND);
+            response->set_id(serviceId);
+            response->set_errormsg("文件不存在");
+            ERROR("会话id: {} 请求上传文件失败, 错误： {}", sessionId, "文件不存在");
+            return;
+        }
+        if(fileMeta->getPath().null())
+        {
+            //文件路径为空
+            response->set_errorcode(suiErrorCodeDef::ERR_FILE_SERVICE_FILE_NOT_FOUND);
+            response->set_id(serviceId);
+            response->set_errormsg("文件不存在");  //统一返回给客户端文件不存在
+            ERROR("会话id: {} 请求上传文件失败, 错误： {}", sessionId, "文件路径为空"); //本地记录真实错误
+            return;
+        }
+        filePath = fileMeta->getPath().get();
         //追加文件
-        auto uploadResult = suifd::suiFastdfs::upload_appender_frist_from_buff(data, filePath);
+        auto uploadResult = suifd::suiFastdfs::upload_appender_from_buff(filePath, data);
         if(uploadResult.has_value())
         {
             //出现错误
@@ -331,12 +357,14 @@ namespace suiFileService
         return;
     }
 
-    void suiFileRpcService::completeVideoUpload(::google::protobuf::RpcController* controller,
-        const ::suiApi::completeVideoUploadReq* request,
-        ::suiApi::completeVideoUploadRsp* response,
+    void suiFileRpcService::completeFileUpload(::google::protobuf::RpcController* controller,
+        const ::suiApi::completeFileUploadReq* request,
+        ::suiApi::completeFileUploadRsp* response,
         ::google::protobuf::Closure* done)
     {
         brpc::ClosureGuard doneGuard(done);
+        (void)controller;
+
         //验证权限
         //获取请求信息
         std::string sessionId = request->sessionid();
@@ -372,7 +400,7 @@ namespace suiFileService
         if(fileMeta->getFileStatus() != suiDataSql::fileStatus::fileStatusUploading)
         {
             //文件状态不对
-            ERROR("会话id: {} 请求上传文件失败, 错误： {}", sessionId, "文件状态不对");
+            ERROR("会话id: {} 请求上传文件失败, 错误： {}, 当前文件状态是", sessionId, "文件状态不对");
             response->set_errorcode(suiErrorCodeDef::ERR_FILE_SERVICE_FILE_STATUS_ERROR);
             response->set_errormsg("文件状态不对");
             response->set_id(serviceId);
@@ -392,12 +420,14 @@ namespace suiFileService
         return;
     }
 
-    void suiFileRpcService::getVideoData(::google::protobuf::RpcController* controller,
-        const ::suiApi::InitGetVideoDataReq* request,
-        ::suiApi::InitGetVideoDataRsp* response,
+    void suiFileRpcService::getFileData(::google::protobuf::RpcController* controller,
+        const ::suiApi::InitGetFileDataReq* request,
+        ::suiApi::InitGetFileDataRsp* response,
         ::google::protobuf::Closure* done)
     {
         brpc::ClosureGuard doneGuard(done);
+        (void)controller;
+
         //返回元数据
         //无需创建下载句柄，多次申请不会对本地造成缓存积累
         //获取请求参数
@@ -428,15 +458,16 @@ namespace suiFileService
         return;
     }
 
-    void suiFileRpcService::downloadVideo(::google::protobuf::RpcController* controller,
-        const ::suiApi::downloadVideoReq* request,
-        ::suiApi::downloadVideoRsp* response,
+    void suiFileRpcService::downloadFile(::google::protobuf::RpcController* controller,
+        const ::suiApi::downloadFileReq* request,
+        ::suiApi::downloadFileRsp* response,
         ::google::protobuf::Closure* done)
     {
         brpc::ClosureGuard doneGuard(done);
-        //直接发回文件流
+        (void)controller;
 
-        //获取
+        //直接发回文件流
+        //获取调用参数
         std::string serviceId = request->id();
         std::string sessionid = request->sessionid();
         auto& param = request->param();
@@ -485,12 +516,21 @@ namespace suiFileService
             response->set_id(serviceId);
             return;
         }
+        if(fileMeta->getPath().null())
+        {
+            //路径不存在
+            ERROR("会话id: {} 请求下载文件失败, 错误： {}", sessionid, "路径不存在");
+            response->set_errorcode(suiErrorCodeDef::ERR_FILE_SERVICE_FILE_NOT_FOUND);
+            response->set_errormsg("文件不存在");
+            response->set_id(serviceId);
+            return;
+        }
 
-        //计算下载块范围
+        //计算下载块起始位置和偏移量
         size_t downChunkStart = chunkIndex * _standardChunkSize;
         //下载数据
         std::string downChunkData;
-        auto downret = suifd::suiFastdfs::download_chunk_to_buff(fileid, downChunkStart, _standardChunkSize, downChunkData);
+        auto downret = suifd::suiFastdfs::download_chunk_to_buff(fileMeta->getPath().get(), downChunkStart, _standardChunkSize, downChunkData);
         if(downret.has_value())
         {
             //存在错误
@@ -500,7 +540,7 @@ namespace suiFileService
             response->set_id(serviceId);
             return;
         }
-
+        INFO("下载块大小: {}", downChunkData.size());
         //验证成功 转发文件信息
         response->set_errorcode(suiErrorCodeDef::SUCCESS);
         response->set_id(serviceId);

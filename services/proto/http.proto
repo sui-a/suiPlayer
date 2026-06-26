@@ -43,11 +43,11 @@ service httpServices {
   rpc downloadImage(httpDownloadImageReq) returns (HttpBody);
 
   rpc uploadFile(httpUploadFileReq) returns (HttpBody);
-  rpc completeVideoUpload(httpCompleteVideoUploadReq) returns (HttpBody);
+  rpc completeFileUpload(httpCompleteFileUploadReq) returns (HttpBody);
 
   //请求分片下载
-  rpc getVideoData(httpInitGetVideoDataReq) returns (HttpBody);
-  rpc downloadVideo(httpDownloadVideoReq) returns (HttpBody);
+  rpc getFileData(httpInitGetFileDataReq) returns (HttpBody);
+  rpc downloadFile(httpDownloadFileReq) returns (HttpBody);
 
   //视频接口
   rpc newVideo(newVideoReq) returns (newVideoRsp);

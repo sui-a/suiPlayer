@@ -35,17 +35,17 @@ namespace suiFileService
                        const ::suiApi::uploadFileReq* request,
                        ::suiApi::uploadFileRsp* response,
                        ::google::protobuf::Closure* done);
-        virtual void completeVideoUpload(::google::protobuf::RpcController* controller,
-                            const ::suiApi::completeVideoUploadReq* request,
-                            ::suiApi::completeVideoUploadRsp* response,
+        virtual void completeFileUpload(::google::protobuf::RpcController* controller,
+                            const ::suiApi::completeFileUploadReq* request,
+                            ::suiApi::completeFileUploadRsp* response,
                             ::google::protobuf::Closure* done);
-        virtual void getVideoData(::google::protobuf::RpcController* controller,
-                            const ::suiApi::InitGetVideoDataReq* request,
-                            ::suiApi::InitGetVideoDataRsp* response,
+        virtual void getFileData(::google::protobuf::RpcController* controller,
+                            const ::suiApi::InitGetFileDataReq* request,
+                            ::suiApi::InitGetFileDataRsp* response,
                             ::google::protobuf::Closure* done);
-        virtual void downloadVideo(::google::protobuf::RpcController* controller,
-                            const ::suiApi::downloadVideoReq* request,
-                            ::suiApi::downloadVideoRsp* response,
+        virtual void downloadFile(::google::protobuf::RpcController* controller,
+                            const ::suiApi::downloadFileReq* request,
+                            ::suiApi::downloadFileRsp* response,
                             ::google::protobuf::Closure* done);
 
     private:

@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 #include <unordered_map>
-
+#include <suiScaffold/log.h>
 
 namespace suifileTarcker
 {
@@ -16,6 +16,7 @@ namespace suifileTarcker
     public:
         FileTracker() = default;
         FileTracker(const FileTracker& tracker);
+        FileTracker& operator=(const FileTracker& tracker);
 
         void setFileId(const std::string& fileid);
         void getFileId(std::string& fileid);

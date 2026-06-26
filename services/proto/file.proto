@@ -55,10 +55,9 @@ message uploadFileParam {
   //上传定位
   optional string uploadId = 5; // 上传id 用于后续数据定位
   optional string fileId = 6; // 追加的文件ID 为空说明是首次上传
-  optional string filePath = 7;
   //数据相关
-  optional string chunkMd5 = 8; // 当前这一小块分片的 MD5
-  optional bytes chunkData = 9; // 二进制分片数据本体
+  optional string chunkMd5 = 7; // 当前这一小块分片的 MD5
+  optional bytes chunkData = 8; // 二进制分片数据本体
 }
 message uploadFileReq {
   optional string id = 1;
@@ -80,20 +79,20 @@ message uploadFileRsp {
 }
 
 //发送完成上传请求
-message httpCompleteVideoUploadReq {}
-message completeVideoUploadParam {
+message httpCompleteFileUploadReq {}
+message completeFileUploadParam {
   //上传定位
   optional string fileId = 1;
   optional string uploadId = 2;
 }
-message completeVideoUploadReq {
+message completeFileUploadReq {
   optional string id = 1;
   optional string sessionId = 2;
-  completeVideoUploadParam param = 3;
+  completeFileUploadParam param = 3;
 }
 
 //
-message completeVideoUploadRsp {
+message completeFileUploadRsp {
   optional string id = 1;
   optional int32 errorCode = 2;
   optional string errorMsg = 3;
@@ -101,53 +100,53 @@ message completeVideoUploadRsp {
 
 //视频下载
 //请求分片下载
-message httpInitGetVideoDataReq {}
-message InitGetVideoDataParm {
+message httpInitGetFileDataReq {}
+message InitGetFileDataParm {
   optional string fileId = 1;
 }
-message InitGetVideoDataReq {
+message InitGetFileDataReq {
   optional string id = 1;
   optional string sessionId = 2;
-  InitGetVideoDataParm param = 3;
+  InitGetFileDataParm param = 3;
 }
 
 //
-message InitGetVideoDataResult {
+message InitGetFileDataResult {
   optional int32 downChunkTotal = 1; // 分片总数
   optional int32 fileSize = 2; //文件总大小
 }
-message InitGetVideoDataRsp {
+message InitGetFileDataRsp {
   optional string id = 1;
   optional int32 errorCode = 2; //错误码是0表示成功，其他表示失败
   optional string errorMsg = 3;
-  InitGetVideoDataResult result = 4; //不装数据，只存储元信息
+  InitGetFileDataResult result = 4; //不装数据，只存储元信息
 }
 
 //文件分片下载
-message httpDownloadVideoReq {}
-message downloadVideoParam {
+message httpDownloadFileReq {}
+message downloadFileParam {
   //定位
   optional int32 chunkIndex = 1; // 请求下载第几个分片
   optional string fileId = 2; // 文件ID
 }
-message downloadVideoReq {
+message downloadFileReq {
   optional string id = 1;
   optional string sessionId = 2;
-  downloadVideoParam param = 3;
+  downloadFileParam param = 3;
 }
 
-message downloadVideoResult {
+message downloadFileResult {
   // 凭证与定位
   optional int32 chunkIndex = 1; // 当前是第几个分片 (从 0 开始)
   // 数据安全与本体
   optional string chunkMd5 = 2; // 当前这一小块分片的 MD5，防止网络传输抖动
   optional bytes chunkData = 3; // 二进制分片数据本体
 }
-message downloadVideoRsp {
+message downloadFileRsp {
   optional string id = 1;
   optional int32 errorCode = 2;
   optional string errorMsg = 3;
-  downloadVideoResult result = 4;
+  downloadFileResult result = 4;
 }
 
 service fileServices {
@@ -156,9 +155,9 @@ service fileServices {
 
   //请求视频上传
   rpc uploadFile(uploadFileReq) returns (uploadFileRsp);
-  rpc completeVideoUpload(completeVideoUploadReq) returns (completeVideoUploadRsp);
+  rpc completeFileUpload(completeFileUploadReq) returns (completeFileUploadRsp);
 
   //请求分片下载
-  rpc getVideoData(InitGetVideoDataReq) returns (InitGetVideoDataRsp);
-  rpc downloadVideo(downloadVideoReq) returns (downloadVideoRsp);
+  rpc getFileData(InitGetFileDataReq) returns (InitGetFileDataRsp);
+  rpc downloadFile(downloadFileReq) returns (downloadFileRsp);
 }

@@ -8,6 +8,19 @@ namespace suifileTarcker
         _operation_type = tracker._operation_type;
         _file_size = tracker._file_size;
         _cur_operation_size = tracker._cur_operation_size;
+        _chunk_size = tracker._chunk_size;
+        _chunk_index = tracker._chunk_index;
+    }
+
+    FileTracker& FileTracker::operator=(const FileTracker& tracker)
+    {
+        _fileid = tracker._fileid;
+        _operation_type = tracker._operation_type;
+        _file_size = tracker._file_size;
+        _cur_operation_size = tracker._cur_operation_size;
+        _chunk_size = tracker._chunk_size;
+        _chunk_index = tracker._chunk_index;
+        return *this;
     }
 
     void FileTracker::setFileId(const std::string& fileid)

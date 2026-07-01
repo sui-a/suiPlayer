@@ -28,11 +28,8 @@ namespace suiRemoveCache
             _redis->del(id);
             msg.add_key(id);
         }
-        // 2. 发布消息  
-        INFO("删除缓存key: {}", cache_key.size());
-        INFO("发布缓存同步消息: {}", msg.SerializeAsString());
+        // 2. 发布消息
         _publisherQueue->publish(msg.SerializeAsString());
-        INFO("发布缓存同步消息完成");
         return true;
     }
     bool RemoveCache::callback(std::string body)
@@ -53,17 +50,6 @@ namespace suiRemoveCache
         INFO("删除缓存key完成");
         return true;
     }
-
-    // bool RemoveCache::setCallback()
-    // {
-    //     _subscribeQueue->consume([this](std::string msg){
-    //         return callback(msg);
-    //     });
-    //     return true;
-
-        
-    // }
-
 
     RemoveCache::~RemoveCache()
     {

@@ -22,19 +22,7 @@ namespace suiSession
     void sessionData::insertToDb(suiDataSql::suiSessionMeta& session)
     {
         //添加会话数据
-        INFO("测试类内db");
-        try 
-        {
-            _db.persist(session);
-        }
-        catch (const odb::exception& e) 
-        {
-            ERROR("❌ 数据库添加会话数据失败 捕获到异常: {}", e.what());
-        }
-        catch (const std::exception& e) 
-        {
-            ERROR("❌ 数据库添加会话数据失败 错误原因: {}", e.what());
-        }
+        _db.persist(session);
     }
     //更新会话
     void sessionData::updateToDb(suiDataSql::suiSessionMeta& session)

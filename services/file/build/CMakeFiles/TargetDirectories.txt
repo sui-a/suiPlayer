@@ -1,0 +1,3 @@
+/home/sui/suiPlayer/services/file/build/CMakeFiles/suiFileService.dir
+/home/sui/suiPlayer/services/file/build/CMakeFiles/edit_cache.dir
+/home/sui/suiPlayer/services/file/build/CMakeFiles/rebuild_cache.dir

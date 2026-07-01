@@ -15,8 +15,9 @@ namespace suiFileService
         try
         {
             odb::transaction t(_db->begin());
-            auto& dbHandler = t.database();
             auto rtx = _redis->transaction(false, false);
+            
+            auto& dbHandler = t.database();
             auto rehandler = rtx.redis();
             suiSession::sessionData sedata(dbHandler, rehandler, _removeCache);
             auto session = sedata.selectBySessionId(session_id);

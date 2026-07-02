@@ -46,7 +46,7 @@ namespace suiDataSql{
     };
 
     //构造视图
-    #pragma db view object(suiSessionMeta) query((?))
+    #pragma db view object(suiSessionMeta = session) query((?))
     struct suiSessionPtr
     {
     public:
@@ -183,6 +183,7 @@ namespace suiDataSql{
 
         //角色字符串切换
     };
+
     namespace suiRoleType
     {
         std::string roleTypeToString(suiDataSql::roleType role_type);
@@ -396,13 +397,21 @@ namespace suiDataSql{
         #pragma db id auto 
         unsigned long long  _primaryKey; //主键
         #pragma db not_null type("VARCHAR(128)")
-        std::string _user_id; //用户id
+        std::string _user_id; //粉丝id
         #pragma db not_null type("VARCHAR(128)")
-        std::string _follow_user_id; //被用户id关注的用户id
+        std::string _follow_user_id; //用户id
 
         //创建索引
         #pragma db index("follow_user_id_idx") member(_follow_user_id)
         #pragma db index("user_follow_unique_idx") unique member(_user_id) member(_follow_user_id)
+    };
+
+    //用户关注数量或被关注数量视图
+    #pragma db view object(suiUserFollowMeta)
+    struct suiUserFollowCountView
+    {
+        #pragma db column("count(*)")
+        std::size_t count;
     };
 
     enum class videoStatus : uint8_t
@@ -515,4 +524,36 @@ namespace suiDataSql{
         #pragma db index("video_id_idx") member(_video_id)
         #pragma db index("user_like_unique_idx") unique member(_user_id) member(_video_id)
     };
+
+    //视频点赞总量
+    #pragma db view object(suiUserLikeMeta)
+    struct suiUserLikeCountView
+    {
+        #pragma db column("count(*)")
+        std::size_t count;
+    };
+
+    //用户数据统计
+    #pragma db view object(suiUsrMeta = user) \
+                    object(suiUserFollowMeta = following : user::_user_id == following::_user_id) \
+                    object(suiUserFollowMeta = followed : user::_user_id == followed::_follow_user_id) \
+                    query((?))
+                    //following查询用户关注的用户 followed查询用户的粉丝
+    struct suiUserDataCountView
+    {
+        using ptr = std::shared_ptr<suiUserDataCountView>;
+        std::shared_ptr<suiUsrMeta> user;
+
+        //关注数量
+        #pragma db column("COUNT(DISTINCT " + following::_primaryKey + ")")
+        size_t following_count;
+
+        //粉丝数量
+        #pragma db column("COUNT(DISTINCT " + followed::_primaryKey + ")")
+        size_t followed_count;
+    };
+
+
+
+
 }

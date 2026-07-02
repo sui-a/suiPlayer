@@ -24,6 +24,10 @@ namespace suiUserFollow
         //查
         bool judgment(const std::string& user_id, const std::string& follow_user_id);
 
+        //查
+        suiDataSql::suiUserFollowMeta::ptr selectToDb(const std::string& user_id, const std::string& follow_user_id);
+        std::vector<suiDataSql::suiUserFollowMeta> selectToDbByUserId(const std::string& user_id);
+        std::vector<suiDataSql::suiUserFollowMeta> selectToDbByFollowUserId(const std::string& follow_user_id);
 
     private:
         //数据库操作句柄

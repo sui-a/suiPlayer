@@ -42,7 +42,6 @@ int main(int argc, char* argv[])
     //解析gflags
     google::ParseCommandLineFlags(&argc, &argv, true);
 
-    //创建rolePermission
     //数据库设置
     suiOdb::odbSetting dbSetting;
     dbSetting._host = FLAGS_mysql_server_registry_center;

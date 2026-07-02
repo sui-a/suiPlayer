@@ -16,10 +16,6 @@ namespace suiRemoveCache
 
         RemoveCache(std::shared_ptr<sw::redis::Redis> redis, suiQueue::MQClient::ptr MqClientPtr);
         bool syncCache(const std::vector<std::string>& cache_key);//缓存同步接口
-
-        //外部单独声明，把构造和订阅方法分离
-        bool setCallback();
-
         ~RemoveCache();
     private:
         bool callback(std::string body); //消息订阅回调函数 取出key对缓存进行删除

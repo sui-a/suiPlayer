@@ -13,19 +13,8 @@ namespace suiRemoveCache
         set.bindKey = "delete_cache",
         set.ttl = 3000;
         _publisherQueue = std::make_shared<suiQueue::suiPublisher>(MqClientPtr, set);
-        
         _subscribeQueue = std::make_shared<suiQueue::suiSubscriber>(MqClientPtr, set);
-        //设置订阅方法
-        //_subscribeQueue->consume(callback);
-
-        std::cout << "1 this 指针地址是 ： " << this << std::endl;
-        // _subscribeQueue->consume([=](std::string msg){
-        //     std::cout << "2 this 指针地址是 ： " << this << std::endl;
-        //     return callback(msg);
-        // });
-
-         _subscribeQueue->consume(std::bind(&RemoveCache::callback, this, std::placeholders::_1));
-        
+        _subscribeQueue->consume(std::bind(&RemoveCache::callback, this, std::placeholders::_1));
     }
 
     bool RemoveCache::syncCache(const std::vector<std::string>& cache_key)
@@ -39,11 +28,8 @@ namespace suiRemoveCache
             _redis->del(id);
             msg.add_key(id);
         }
-        // 2. 发布消息  
-        INFO("删除缓存key: {}", cache_key.size());
-        INFO("发布缓存同步消息: {}", msg.SerializeAsString());
+        // 2. 发布消息
         _publisherQueue->publish(msg.SerializeAsString());
-        INFO("发布缓存同步消息完成");
         return true;
     }
     bool RemoveCache::callback(std::string body)
@@ -65,19 +51,9 @@ namespace suiRemoveCache
         return true;
     }
 
-    // bool RemoveCache::setCallback()
-    // {
-    //     _subscribeQueue->consume([this](std::string msg){
-    //         return callback(msg);
-    //     });
-    //     return true;
+    RemoveCache::~RemoveCache()
+    {
 
-        
-    // }
-
-
-    RemoveCache::~RemoveCache(){
-        std::cout << "RemoveCache 析构函数调用" << std::endl;
     }
     
 }

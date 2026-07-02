@@ -1,15 +1,18 @@
 #pragma once
-#include <iostream>
 #include <string>
 #include <optional>
-
+#include <memory>
 extern "C" {
     #include <fastcommon/logger.h>
     #include <fastdfs/fdfs_client.h>
 }
+#ifdef byte
+  #undef byte
+#endif
 
+#include "log.h"
 
-namespace sui
+namespace suifd
 {
     struct FastdfsSetting
     {
@@ -26,12 +29,21 @@ namespace sui
     //
     std::optional<std::string> fdfsCreate(const FastdfsSetting& setting);
 
+    struct DownloadContext 
+    {
+        std::string* buffer;
+    };
+
+    // FastDFS 的 C 风格回调函数
+    extern "C" int chunk_download_callback(void* arg, int64_t file_size, const char* block_buff, int block_bytes);
+
     class suiFastdfs
     {
         suiFastdfs();
         static std::optional<std::string> init(const FastdfsSetting& setting);
 
     public:
+        using ptr = std::shared_ptr<suiFastdfs>;
         ~suiFastdfs();
         static std::optional<std::string> upload_from_file(const std::string& filepath, std::string& file_id); //从文件上传数据
         static std::optional<std::string> download_to_file(const std::string& filepath, const std::string& file_id, int64_t* file_size_ptr = nullptr); //从文件下载数据
@@ -42,6 +54,11 @@ namespace sui
         static std::optional<std::string> download_to_buff(const std::string& file_id, std::string& buff); //下载数据到缓冲区
 
         friend std::optional<std::string> fdfsCreate(const FastdfsSetting& setting);
+
+        //分片流
+        static std::optional<std::string> upload_appender_frist_from_buff(std::string& buff, std::string& file_id);
+        static std::optional<std::string> upload_appender_from_buff(const std::string& file_id, std::string& buff);
+        static std::optional<std::string> download_chunk_to_buff(const std::string& file_id, int64_t offset, int64_t download_bytes, std::string& out_buff);
 
     private:
         static FastdfsSetting _setting; //此时的配置参数

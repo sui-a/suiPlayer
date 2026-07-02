@@ -9,6 +9,7 @@ services:        # 服务定义区块
       - "8081:6379"
     networks:
       - suiNetwork   # 加入指定网络
+
   sui-mq:
     image: rabbitmq:3.9-management-alpine
     container_name: suiMQ
@@ -20,6 +21,37 @@ services:        # 服务定义区块
       - "8083:15672"
     networks:
       - suiNetwork   # 加入指定网络
+
+  # 1. 部署 Tracker 节点 (调度服务器)
+  tracker:
+    image: delron/fastdfs
+    container_name: suiFastdfsTracker
+    command: tracker
+    volumes:
+      - ./tracker_data:/var/fdfs
+    network_mode: "host"
+
+  # 2. 部署 Storage 节点 (存储服务器)
+  storage:
+    image: delron/fastdfs
+    container_name: suiFastdfsStorage
+    depends_on:
+      - tracker
+    command: storage
+    environment:
+      - TRACKER_SERVER=10.3.171.67:22122 
+    volumes:
+      - ./storage_data:/var/fdfs
+    network_mode: "host"
+
+  etcd:
+    image: bitnami/etcd:3.5  # 建议指定具体主版本号
+    ports:
+      - "8084:2379"
+    environment:
+      - ALLOW_NONE_AUTHENTICATION=yes
+      - ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
+      - ETCD_ADVERTISE_CLIENT_URLS=http://127.0.0.1:8084
 
 # 定义网络
 networks:  # 自定义网络（隔离通信）

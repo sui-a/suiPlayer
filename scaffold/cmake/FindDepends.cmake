@@ -9,7 +9,7 @@ set(libs jsoncpp protobuf spdlog
 )
 
 macro(find_libraries lib) 
-    find_library(${lib}_LIBRARY ${lib} PATHS /usr/lib /usr/lib/x86_64-linux-gnu /usr/local/lib)
+    find_library(${lib}_LIBRARY ${lib} PATHS /usr/lib /usr/lib/x86_64-linux-gnu /usr/local/lib )
     if(${lib}_LIBRARY)
         set(${lib}_FOUND TRUE)
     else()

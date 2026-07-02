@@ -37,16 +37,17 @@ service httpServices {
   rpc GetAdmin(GetAdminReq) returns (GetAdminRsp);
   rpc GetAdminList(GetAdminListReq) returns (GetAdminListRsp);
 
-  //文件服务
+  //文件服务接口
+  //图像上下传接口
   rpc uploadImage(httpUploadImageReq) returns (HttpBody);
   rpc downloadImage(httpDownloadImageReq) returns (HttpBody);
 
-  rpc initVideoUpload(httpInitVideoUploadReq) returns (HttpBody);
-  rpc uploadVideoPart(httpUploadVideoPartReq) returns (HttpBody);
-  rpc completeVideoUpload(httpCompleteVideoUploadReq) returns (HttpBody);
+  rpc uploadFile(httpUploadFileReq) returns (HttpBody);
+  rpc completeFileUpload(httpCompleteFileUploadReq) returns (HttpBody);
 
-  rpc getVideoData(httpGetVideoDataReq) returns (HttpBody);
-  rpc downloadVideo(httpDownloadVideoReq) returns (HttpBody);
+  //请求分片下载
+  rpc getFileData(httpInitGetFileDataReq) returns (HttpBody);
+  rpc downloadFile(httpDownloadFileReq) returns (HttpBody);
 
   //视频接口
   rpc newVideo(newVideoReq) returns (newVideoRsp);
@@ -61,7 +62,7 @@ service httpServices {
   rpc removeShelvesVideo(removeShelvesVideoReq) returns (removeShelvesVideoRsp);
   rpc getUserVideoList(getUserVideoListReq) returns (getUserVideoListRsp);
   rpc getStatusVideoList(getStatusVideoListReq) returns (getStatusVideoListRsp);
-  rpc getHomeRandomVideoList(getHomeRandomVideoListReq) returns (getHomeRandomVideoListRsp); 
+  rpc getHomeRandomVideoList(getHomeRandomVideoListReq) returns (getHomeRandomVideoListRsp);
   rpc getCategoryVideoList(getCategoryVideoListReq) returns (getCategoryVideoListRsp);
   rpc getTagVideoList(getTagVideoListReq) returns (getTagVideoListRsp);
   rpc searchVideoList(searchVideoListReq) returns (searchVideoListRsp);

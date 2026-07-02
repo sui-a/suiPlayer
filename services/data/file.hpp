@@ -16,6 +16,8 @@ namespace suiFile
         void update(suiDataSql::suiFileMeta& fileMeta);
         void remove(suiDataSql::suiFileMeta& fileMeta);
 
+        void removeByFileId(const std::string& fileId);
+
         suiDataSql::suiFileMeta::ptr selectFileByFileId(const std::string& id);
 
     private:

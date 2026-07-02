@@ -31,4 +31,11 @@ namespace suiFile
         suiDataSql::suiFileMeta::ptr res(_db.query_one<suiDataSql::suiFileMeta>(Query::file_id == fileid));
         return res;
     }
+
+    void FileData::removeByFileId(const std::string& fileId)
+    {
+        auto fileMeta = selectFileByFileId(fileId);
+        if(fileMeta)
+            remove(*fileMeta);
+    }
 }

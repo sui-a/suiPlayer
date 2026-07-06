@@ -34,7 +34,6 @@ namespace suiRemoveCache
     }
     bool RemoveCache::callback(std::string body)
     {
-        INFO("进入消息回调处理");
         suiApi::DeleteCacheMsg msg;
         bool ret = msg.ParseFromString(body);
         if(!ret) {
@@ -42,12 +41,10 @@ namespace suiRemoveCache
             return true;  //反序列化失败，但返回true 目的是不中断消息队列的消费 无效消息丢弃即可
         }
         int sz = msg.key_size();
-        INFO("收到删除缓存key消息，共{}个key", sz);
         for(int i = 0; i < sz; i++) {
             INFO("删除缓存key: {}", msg.key(i));
             _redis->del(msg.key(i));
         }
-        INFO("删除缓存key完成");
         return true;
     }
 

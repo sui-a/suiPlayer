@@ -525,35 +525,37 @@ namespace suiDataSql{
         #pragma db index("user_like_unique_idx") unique member(_user_id) member(_video_id)
     };
 
-    //视频点赞总量
-    #pragma db view object(suiUserLikeMeta)
+    //视频点赞总量视图
+    #pragma db view object(suiUserLikeMeta) \
+                    object(suiVideoMeta : suiUserLikeMeta::_video_id == suiVideoMeta::_video_id)
     struct suiUserLikeCountView
     {
-        #pragma db column("count(*)")
-        std::size_t count;
+        //点赞总量
+        #pragma db column("COUNT(*)")
+        size_t count;
     };
 
-    //用户数据统计
-    #pragma db view object(suiUsrMeta = user) \
-                    object(suiUserFollowMeta = following : user::_user_id == following::_user_id) \
-                    object(suiUserFollowMeta = followed : user::_user_id == followed::_follow_user_id) \
-                    query((?))
-                    //following查询用户关注的用户 followed查询用户的粉丝
-    struct suiUserDataCountView
+    //视频播放总量
+    #pragma db view object(suiVideoMeta) query((?))
+    struct suiVideoPlayCountView
     {
-        using ptr = std::shared_ptr<suiUserDataCountView>;
-        std::shared_ptr<suiUsrMeta> user;
-
-        //关注数量
-        #pragma db column("COUNT(DISTINCT " + following::_primaryKey + ")")
-        size_t following_count;
-
-        //粉丝数量
-        #pragma db column("COUNT(DISTINCT " + followed::_primaryKey + ")")
-        size_t followed_count;
+        //播放总量
+        #pragma db column("IFNULL(SUM(video_play_count), 0)")
+        size_t count;
     };
 
+    //用户主页基础数据
+    struct UserHomepageBasicData 
+    {
+        //粉丝数
+        size_t fansCount;
+        //关注数
+        size_t followCount;
+        //视频点赞总量
+        size_t videoLikeCount;
+        //视频播放总量
+        size_t videoPlayCount;
 
-
-
+        using ptr = std::shared_ptr<UserHomepageBasicData>;
+    };
 }

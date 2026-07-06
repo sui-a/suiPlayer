@@ -47,7 +47,7 @@ void getFollowUserCount(std::shared_ptr<odb::database> curDb, const std::string&
         auto& curhandle = tx.database();
         
         //开始测试
-        INFO("查询A用户关注的所有用户");
+        INFO("查询用户 {} 关注的所有用户", userId);
         auto ret = curhandle.query_one<suiDataSql::suiUserFollowCountView>(odb::query<suiDataSql::suiUserFollowCountView>::user_id == userId);
         tx.commit();
         if(ret == nullptr)
@@ -81,7 +81,7 @@ void getFansCount(std::shared_ptr<odb::database> curDb, const std::string& userI
         auto& curhandle = tx.database();
         
         //开始测试
-        INFO("查询用户 {} 关注的所有用户", userId);
+        INFO("查询用户 {} 的所有粉丝", userId);
         auto ret = curhandle.query_one<suiDataSql::suiUserFollowCountView>(odb::query<suiDataSql::suiUserFollowCountView>::follow_user_id == userId);
         tx.commit();
         if(ret == nullptr)
@@ -90,45 +90,6 @@ void getFansCount(std::shared_ptr<odb::database> curDb, const std::string& userI
             return;
         }
         INFO("查询成功, 用户粉丝数量为： {}", ret->count);
-    }
-    catch (const odb::exception& e)
-    {
-        // 捕获 ODB 数据库异常
-        ERROR("数据库异常： {}", e.what());
-        return;
-    }
-    catch (...)
-    {
-        ERROR("未知异常");
-        return;
-    }
-}
-
-
-//获取用户基础信息集合
-void getBasicInformationCollection(std::shared_ptr<odb::database> curDb, const std::string& userId)
-{
-    try
-    {
-        //创建odb事务
-        odb::transaction tx(curDb->begin());
-        //创建单连接操作句柄
-        auto& curhandle = tx.database();
-        
-        //开始测试
-        INFO("查询A用户关注的所有用户");
-        auto ret = curhandle.query_one<suiDataSql::suiUserDataCountView>(odb::query<suiDataSql::suiUserDataCountView>::user::user_id == userId);
-        tx.commit();
-        if(ret == nullptr)
-        {
-            INFO("查询结果为空，出现错误");
-            return;
-        }
-        INFO("查询成功, 用户粉丝数量为： {}", ret->followed_count);
-        INFO("用户关注数量为： {}", ret->following_count);
-        INFO("用户基础信息为： 用户id： {}", ret->user->getUserId());
-        INFO("用户名： {}", ret->user->getUserName());
-        INFO("用户绑定邮箱： {}", ret->user->getBindEmail());
     }
     catch (const odb::exception& e)
     {
@@ -179,10 +140,6 @@ int main(int argc, char* argv[])
         getFansCount(curDb, "user_D");
         getFansCount(curDb, "user_E");
         getFansCount(curDb, "user_F");
-    }
-
-    {
-        //获取各个用户的基础信息集
     }
 
     return 0;

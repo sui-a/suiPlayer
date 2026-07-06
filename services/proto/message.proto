@@ -11,3 +11,8 @@ message DeleteCacheMsg {
 message DeleteFileMsg {
   repeated string fileId = 1;
 }
+
+message setUserStatisticsMsg {
+  string user_id = 1;
+  int32 change = 2;
+}

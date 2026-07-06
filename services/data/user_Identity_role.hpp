@@ -1,3 +1,4 @@
+#pragma once
 #include <suiScaffold/suiodb.hpp>
 #include <suiScaffold/suiRedis.hpp>
 #include <suiScaffold/suiQueue.hpp>

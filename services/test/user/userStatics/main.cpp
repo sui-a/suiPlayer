@@ -2,7 +2,9 @@
 #include <gflags/gflags.h>
 #include <suiScaffold/suiSerSearch.hpp>
 #include <suiScaffold/suiodb.hpp>
-#include "set_user_statistics.hpp"
+#include <suiScaffold/suiRedis.hpp>
+#include "db_set_async.hpp"
+#include "user_data_statistics.hpp"
 
 //注册中心地址
 DEFINE_string(file_server_registry_center, "127.0.0.1:8084", "file_server注册中心地址");
@@ -34,6 +36,106 @@ DEFINE_string(file_server_remove_exchange_type, "direct", "文件删除队列交
 DEFINE_string(file_server_remove_queue, "file_remove_queue", "文件删除队列名称");
 DEFINE_string(file_server_remove_bind_key, "file_remove_key", "文件删除队列绑定键");
 
+
+//获取基础信息
+void getBasicInfo(std::shared_ptr<odb::database> curDb, std::shared_ptr<sw::redis::Redis> curRedis
+                , suiRemoveCache::RemoveCache::ptr curRemoveCache
+                , const std::string& userId)
+{
+    try{
+        INFO("user {}基础数据的获取", userId);
+
+        //创建数据库事务
+        odb::transaction t(curDb->begin());
+        auto& dbHandler = t.database();
+        
+        //创建redis事务
+        auto rtx = curRedis->transaction(false, false);
+        auto rehandler = rtx.redis();
+
+        //创建信息操作对象
+        suiUserStatics::suiStatics stats(dbHandler, rehandler, curRemoveCache, rtx);
+
+        //获取信息
+        auto it = stats.getUserBasicData(userId);
+
+        if(!it)
+        {
+            //存在
+        }
+
+        //打印信息
+        INFO("user {} 信息获取成功", userId);
+        INFO("user {} 粉丝数量: {}", userId, it->fansCount);
+        INFO("user {} 关注数量: {}", userId, it->followCount);
+        INFO("user {} 总播放数量: {}", userId, it->videoPlayCount);
+        INFO("user {} 点赞视频数量: {}", userId, it->videoLikeCount);
+
+        t.commit();
+    }
+    catch (const odb::exception& e)
+    {
+        // 捕获 ODB 数据库异常
+        ERROR("数据库异常： {}", e.what());
+        return;
+    }
+    catch (const sw::redis::Error& e) 
+    {
+        // 捕获 Redis 异常
+        ERROR("redis异常： {}", e.what());
+        return;
+    }
+    catch (...)
+    {
+        ERROR("未知异常");
+        return;
+    }
+    //
+}
+
+//点赞量+10接口
+void likeCountSetText(std::shared_ptr<odb::database> curDb, std::shared_ptr<sw::redis::Redis> curRedis
+                , suiRemoveCache::RemoveCache::ptr curRemoveCache
+                , const std::string& userId)
+{
+    try{
+        INFO("user {}基础数据的获取", userId);
+
+        //创建数据库事务
+        odb::transaction t(curDb->begin());
+        auto& dbHandler = t.database();
+        
+        //创建redis事务
+        auto rtx = curRedis->transaction(false, false);
+        auto rehandler = rtx.redis();
+
+        //创建信息操作对象
+        suiUserStatics::suiStatics stats(dbHandler, rehandler, curRemoveCache, rtx);
+
+        //获取信息
+        stats.setVideoLikeCountByChange(userId, 10);
+        rtx.exec();
+        t.commit();
+    }
+    catch (const odb::exception& e)
+    {
+        // 捕获 ODB 数据库异常
+        ERROR("数据库异常： {}", e.what());
+        return;
+    }
+    catch (const sw::redis::Error& e) 
+    {
+        // 捕获 Redis 异常
+        ERROR("redis异常： {}", e.what());
+        return;
+    }
+    catch (...)
+    {
+        ERROR("未知异常");
+        return;
+    }
+    //
+}
 
 int main(int argc, char* argv[])
 {
@@ -67,9 +169,29 @@ int main(int argc, char* argv[])
 
     //删除队列
     suiRemoveCache::RemoveCache::ptr curRemoveCache = suiRemoveCache::RemoveCacheFactory::create(curRedis, _mqClienrt);
+    
+    {
+        //数据获取正确
+        getBasicInfo(curDb, curRedis, curRemoveCache, "user_A");
+        /*
+        getBasicInfo(curDb, curRedis, curRemoveCache, setUserStatistics, "user_B");
+        getBasicInfo(curDb, curRedis, curRemoveCache, setUserStatistics, "user_C");
+        getBasicInfo(curDb, curRedis, curRemoveCache, setUserStatistics, "user_D");
+        getBasicInfo(curDb, curRedis, curRemoveCache, setUserStatistics, "user_E");
+        getBasicInfo(curDb, curRedis, curRemoveCache, setUserStatistics, "user_F");*/
+    }
+    INFO("数据获取完成, 点击回车开始测试数据修改");
+    std::cin.get();
 
-    INFO("开始测试rolePermission");
-    
-    
+    //开始测试数据修改
+    {
+        //直接让user_A总点赞量+10
+        likeCountSetText(curDb, curRedis, curRemoveCache, "user_A");
+        INFO("user_A 点赞量+10 完成");
+        INFO("查看redis是否改变");
+        //再获取一遍数据，查看redis中是否改变
+        getBasicInfo(curDb, curRedis, curRemoveCache, "user_A");
+    }
+    INFO("本次测试结束");
     return 0;
 }

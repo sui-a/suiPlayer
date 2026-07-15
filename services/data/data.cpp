@@ -40,29 +40,15 @@ namespace suiDataSql
     {
         return _user_id;
     }
-    std::string suiSessionMeta::getUploadTimeString() const
-    {
-        if (_upload_time == 0) return "";
-
-        time_t time_val = static_cast<time_t>(_upload_time);
-        struct tm *tm_info = localtime(&time_val);
-        if (!tm_info)
-        {
-            ERROR("时间解析失败");
-            return "";
-        }
-
-        //开始构造
-        std::stringstream ss;
-
-        ss << tm_info->tm_year + 1900 << "-" << tm_info->tm_mon + 1 << "-" << tm_info->tm_mday << ' ';
-        ss << tm_info->tm_hour << ':' << tm_info->tm_min << ':' << tm_info->tm_sec;
-        return ss.str();
-    }
 
     void suiSessionMeta::setUploadTime()
     {
-        _upload_time = static_cast<std::uint64_t>(std::time(nullptr));
+        _upload_time = static_cast<std::uint64_t>(suiTime::suiTimeOperater::get_timestamp_sec());
+    }
+
+    void suiSessionMeta::setUploadTime(std::uint64_t upload_time)
+    {
+        _upload_time = upload_time;
     }
     
     std::uint64_t suiSessionMeta::getUploadTime() const
@@ -199,7 +185,7 @@ namespace suiDataSql
 
     void suiFileMeta::setUploadTime()
     {
-        _upload_time = static_cast<std::uint64_t>(std::time(nullptr));
+        _upload_time = static_cast<std::uint64_t>(suiTime::suiTimeOperater::get_timestamp_sec());
     }
     /*file end ===============================================================================================*/
 
@@ -387,9 +373,42 @@ namespace suiDataSql
         return _operation_description;
     }
     /*操作元信息表 end ===============================================================================================*/
+    /*用户状态工具 ===================================================================================================*/
+    std::string userStatusUtil::userStatusToString(userStatus user_status)
+    {
+        switch (user_status)
+        {
+            case userStatus::userStatusUnknow:
+                return "userStatusUnknow";
+            case userStatus::userStatusEnable:
+                return "userStatusEnable";
+            case userStatus::userStatusDisable:
+                return "userStatusDisable";
+            default:
+                return "userStatusUnknown";
+        }
+    }
 
-        /*用户表 ===============================================================================================*/
+    userStatus userStatusUtil::userStatusFromString(const std::string& userStatusStr)
+    {
+        if(userStatusStr == "userStatusEnable")
+            return userStatus::userStatusEnable;
+        else if(userStatusStr == "userStatusDisable")
+            return userStatus::userStatusDisable;
+        return userStatus::userStatusUnknow;
+    }
+    
+    /*用户状态工具 end ===============================================================================================*/
+    /*用户表 ========================================================================================================*/
     suiUsrMeta::suiUsrMeta()
+    {
+
+    }
+
+    suiUsrMeta::suiUsrMeta(const std::string& uid, const std::string& email)
+        :_user_id(uid), _bind_email(email)
+        ,_user_name("新用户"), _user_status(userStatus::userStatusEnable)
+        ,_upload_time(static_cast<std::uint64_t>(suiTime::suiTimeOperater::get_timestamp_sec()))
     {
 
     }
@@ -409,22 +428,22 @@ namespace suiDataSql
         _user_name = user_name;
     }
 
-    void suiUsrMeta::setAdministratorName(const std::string& administrator_name)
+    void suiUsrMeta::setAdministratorName(const odb::nullable<std::string>& administrator_name)
     {
         _administrator_name = administrator_name;
     }
 
-    void suiUsrMeta::setPassword(const std::string& password)
+    void suiUsrMeta::setPassword(const odb::nullable<std::string>& password)
     {
         _password = password;
     }
 
-    void suiUsrMeta::setHeadImageFileId(const std::string& head_image_file_id)
+    void suiUsrMeta::setHeadImageFileId(const odb::nullable<std::string>& head_image_file_id)
     {
         _head_image_file_id = head_image_file_id;
     }
 
-    void suiUsrMeta::setUserDescription(const std::string& user_description)
+    void suiUsrMeta::setUserDescription(const odb::nullable<std::string>& user_description)
     {
         _user_description = user_description;
     }
@@ -436,7 +455,12 @@ namespace suiDataSql
 
     void suiUsrMeta::setUploadTime()
     {
-        _upload_time = static_cast<std::uint64_t>(std::time(nullptr));
+        _upload_time = static_cast<std::uint64_t>(suiTime::suiTimeOperater::get_timestamp_sec());
+    }
+
+    void suiUsrMeta::setUploadTime(std::uint64_t upload_time)
+    {
+        _upload_time = upload_time;
     }
 
     const std::string& suiUsrMeta::getUserId()
@@ -731,7 +755,174 @@ namespace suiDataSql
     /*用户点赞关系表 end ===============================================================================================*/
 
 
+    /*数据库工具类 =====================================================================================================*/
+    std::string SqlPaginationUtil::buildPageClause(int pageSize, int page) 
+    {
+        // 计算偏移量
+        int offset = page * pageSize;
+        
+        // 建议：在首部强制加一个空格，这样直接用 q += buildPageClause(...) 时绝对不会发生 SQL 粘连 Bug
+        return "LIMIT " + std::to_string(pageSize) + 
+            " OFFSET " + std::to_string(offset);
+    }
 
+    std::string SqlPaginationUtil::buildOrderByClause(const std::string& orderByColumn, bool isDesc)
+    {
+        return " ORDER BY " + orderByColumn + " " +
+            (isDesc ? " DESC" : " ASC");
+    }
+    /*数据库工具类 end =====================================================================================================*/
+    /*标签信息类      =====================================================================================================*/
 
+    suiTagTarget::suiTagTarget()
+    {
 
+    }
+
+    void suiTagTarget::setTagId(const std::string& tag_id)
+    {
+        _tag_id = tag_id;
+    }
+    void suiTagTarget::setTagName(const std::string& tag_name)
+    {
+        _tag_name = tag_name;
+    }
+    void suiTagTarget::setTagDescription(const std::string& tag_description)
+    {
+        _tag_description = tag_description;
+    }
+
+    std::string& suiTagTarget::getTagId()
+    {
+        return _tag_id;
+    }
+    std::string& suiTagTarget::getTagName()
+    {
+        return _tag_name;
+    }
+    odb::nullable<std::string>& suiTagTarget::getTagDescription()
+    {
+        return _tag_description;
+    }
+    /*标签信息类 end =====================================================================================================*/
+    /*分类信息类      =====================================================================================================*/
+
+    suiCategoryTarget::suiCategoryTarget()
+    {
+
+    }
+
+    void suiCategoryTarget::setCategoryId(const std::string& category_id)
+    {
+        _category_id = category_id;
+    }
+    void suiCategoryTarget::setCategoryName(const std::string& category_name)
+    {
+        _category_name = category_name;
+    }
+    void suiCategoryTarget::setCategoryDescription(const std::string& category_description)
+    {
+        _category_description = category_description;
+    }
+
+    std::string& suiCategoryTarget::getCategoryId()
+    {
+        return _category_id;
+    }
+    std::string& suiCategoryTarget::getCategoryName()
+    {
+        return _category_name;
+    }
+    odb::nullable<std::string>& suiCategoryTarget::getCategoryDescription()
+    {
+        return _category_description;
+    }
+    /*分类信息类 end =====================================================================================================*/
+    /*视频标签映射类      =====================================================================================================*/
+
+    suiVideoTagMeta::suiVideoTagMeta()
+    {
+
+    }
+
+    void suiVideoTagMeta::setVideoId(const std::string& video_id)
+    {
+        _video_id = video_id;
+    }
+    void suiVideoTagMeta::setTagId(const std::string& tag_id)
+    {
+        _tag_id = tag_id;
+    }
+
+    const std::string& suiVideoTagMeta::getVideoId()
+    {
+        return _video_id;
+    }
+    const std::string& suiVideoTagMeta::getTagId()
+    {
+        return _tag_id;
+    }
+    /*视频标签映射类 end =====================================================================================================*/
+
+    /*视频分类映射类      =====================================================================================================*/
+
+    suiVideoCategoryMeta::suiVideoCategoryMeta()
+    {
+
+    }
+
+    void suiVideoCategoryMeta::setVideoId(const std::string& video_id)
+    {
+        _video_id = video_id;
+    }
+    void suiVideoCategoryMeta::setCategoryId(const std::string& category_id)
+    {
+        _category_id = category_id;
+    }
+
+    const std::string& suiVideoCategoryMeta::getVideoId()
+    {
+        return _video_id;
+    }
+    const std::string& suiVideoCategoryMeta::getCategoryId()
+    {
+        return _category_id;
+    }
+    /*视频分类映射类 end =====================================================================================================*/
+
+    /*视频弹幕信息类      =====================================================================================================*/
+
+    suiVideoSubtitleTarget::suiVideoSubtitleTarget()
+    {
+
+    }
+
+    void suiVideoSubtitleTarget::setVideoId(const std::string& video_id)
+    {
+        _video_id = video_id;
+    }
+    void suiVideoSubtitleTarget::setUserId(const std::string& user_id)
+    {
+        _user_id = user_id;
+    }
+    void suiVideoSubtitleTarget::setBulletchat(const std::string& bulletchat)
+    {
+        _bulletchat = bulletchat;
+    }
+
+    std::string& suiVideoSubtitleTarget::getVideoId()
+    {
+        return _video_id;
+    }
+    std::string& suiVideoSubtitleTarget::getUserId()
+    {
+        return _user_id;
+    }
+    std::string& suiVideoSubtitleTarget::getBulletchat()
+    {
+        return _bulletchat;
+    }
+    /*视频弹幕信息类 end =====================================================================================================*/
+
+    
 }

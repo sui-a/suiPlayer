@@ -4,8 +4,10 @@
 #include <odb/nullable.hxx>
 #include <memory>
 #include <string>
+#include <vector>
 #include <cstddef>
 #include <cstdint>
+#include "suiTime.hpp"
 
 namespace suiDataSql{
     //定义数据结构
@@ -23,12 +25,12 @@ namespace suiDataSql{
         unsigned long long getPrimaryKey() const;
         std::string getSessionId() const;
         odb::nullable<std::string> getUserId() const;
-        std::string getUploadTimeString() const;
         std::uint64_t getUploadTime() const;
 
         void setSessionId(const std::string& session_id);
         void setUserId(odb::nullable<std::string> user_id);
         void setUploadTime();
+        void setUploadTime(std::uint64_t upload_time);
 
     private:
         friend class ::odb::access;
@@ -180,8 +182,6 @@ namespace suiDataSql{
         roleTypeAdmin = 2,
         //超级管理员角色
         roleTypeSuperAdmin = 3, //最高级权限角色
-
-        //角色字符串切换
     };
 
     namespace suiRoleType
@@ -256,11 +256,16 @@ namespace suiDataSql{
     {
         //未知用户状态
         userStatusUnknow = 0,
-        //普通用户
         userStatusEnable = 1, //使能状态
-        //高权限用户 
         userStatusDisable = 2, //被禁用状态
     };
+
+    //用户状态转字符
+    namespace userStatusUtil
+    {
+        std::string userStatusToString(userStatus user_status);
+        userStatus userStatusFromString(const std::string& userStatusStr);
+    }
 
     //用户表
     #pragma db object table("tbl_user_meta")
@@ -270,15 +275,18 @@ namespace suiDataSql{
         using ptr = std::shared_ptr<suiUsrMeta>;
 
         suiUsrMeta();
+        //其余默认值
+        suiUsrMeta(const std::string& uid, const std::string& email);
 
         void setUserId(const std::string& user_id);
         void setBindEmail(const std::string& bind_email);
         void setUserName(const std::string& user_name);
-        void setAdministratorName(const std::string& administrator_name);
-        void setPassword(const std::string& password);
-        void setHeadImageFileId(const std::string& head_image_file_id);
-        void setUserDescription(const std::string& user_description);
+        void setAdministratorName(const odb::nullable<std::string>& administrator_name);
+        void setPassword(const odb::nullable<std::string>& password);
+        void setHeadImageFileId(const odb::nullable<std::string>& head_image_file_id);
+        void setUserDescription(const odb::nullable<std::string>& user_description);
         void setUserStatus(userStatus user_status);
+        void setUploadTime(std::uint64_t upload_time);
         void setUploadTime();
 
         const std::string& getUserId();
@@ -307,7 +315,7 @@ namespace suiDataSql{
         #pragma db type("VARCHAR(512)")
         odb::nullable<std::string> _head_image_file_id; //头像文件id
         #pragma db type("VARCHAR(128)")
-        odb::nullable<std::string> _user_description; //用户备注
+        odb::nullable<std::string> _user_description; //管理员用户备注描述
         #pragma db not_null type("TINYINT UNSIGNED")
         userStatus _user_status; //用户状态
         #pragma db not_null type("BIGINT UNSIGNED NOT NULL DEFAULT 0")
@@ -558,4 +566,192 @@ namespace suiDataSql{
 
         using ptr = std::shared_ptr<UserHomepageBasicData>;
     };
+
+    //批量返回用户info列表
+    struct userInfoList
+    {
+        using ptr = std::shared_ptr<userInfoList>;
+
+        //用户信息列表
+        std::vector<suiUsrMeta> list;
+        //总数
+        int total = 0;
+    };
+
+    //联查用户表与权限身份映射表
+    #pragma db view object(suiUsrMeta) \
+            object(suiUserIdIdentityRoleMeta: suiUserIdIdentityRoleMeta::_user_id == suiUsrMeta::_user_id)\
+            query((?))
+    struct suiUserIdIdentityRoleView
+    {
+        using ptr = std::shared_ptr<suiUserIdIdentityRoleView>;
+        //用户基础信息
+        suiUsrMeta::ptr usrMeta;
+    };
+
+    class SqlPaginationUtil
+    {
+    public:
+        static std::string buildPageClause(int pageSize, int page);
+        static std::string buildOrderByClause(const std::string& orderByColumn, bool isDesc = false);
+    };
+
+
+    //验证码结构体
+    struct suiVirfyCoder
+    {
+        using ptr = std::shared_ptr<suiVirfyCoder>;
+
+        //会话id
+        std::string _session_id;
+        //验证码id
+        std::string _code_id;
+        //验证码本体
+        std::string _code;
+    };
+
+    //标签表
+    #pragma db object table("tbl_tag_target")
+    class suiTagTarget
+    {
+    public:
+        using ptr = std::shared_ptr<suiTagTarget>;
+
+        suiTagTarget();
+
+        void setTagId(const std::string& tag_id);
+        void setTagName(const std::string& tag_name);
+        void setTagDescription(const std::string& tag_description);
+
+        std::string& getTagId();
+        std::string& getTagName();
+        odb::nullable<std::string>& getTagDescription();
+    private:
+        friend class ::odb::access;
+        #pragma db id auto 
+        unsigned long long  _primaryKey; //主键
+        #pragma db not_null type("VARCHAR(128)") unique
+        std::string _tag_id; //标签id
+        #pragma db not_null type("VARCHAR(32)")
+        std::string _tag_name; //标签名称
+        #pragma db type("TEXT")
+        odb::nullable<std::string> _tag_description; //标签描述
+    };
+
+    //分类表
+    #pragma db object table("tbl_category_target")
+    class suiCategoryTarget
+    {
+    public:
+        using ptr = std::shared_ptr<suiCategoryTarget>;
+
+        suiCategoryTarget();
+
+        void setCategoryId(const std::string& category_id);
+        void setCategoryName(const std::string& category_name);
+        void setCategoryDescription(const std::string& category_description);
+
+        std::string& getCategoryId();
+        std::string& getCategoryName();
+        odb::nullable<std::string>& getCategoryDescription();
+    private:
+        friend class ::odb::access;
+        #pragma db id auto 
+        unsigned long long  _primaryKey; //主键
+        #pragma db not_null type("VARCHAR(128)") unique
+        std::string _category_id; //分类id
+        #pragma db not_null type("VARCHAR(32)")
+        std::string _category_name; //分类名称
+        #pragma db type("TEXT")
+        odb::nullable<std::string> _category_description; //分类描述
+    };
+
+    //视频标签映射表
+    #pragma db object table("tbl_video_tag_meta")
+    class suiVideoTagMeta
+    {
+    public:
+        using ptr = std::shared_ptr<suiVideoTagMeta>;
+
+        suiVideoTagMeta();
+
+        void setVideoId(const std::string& video_id);
+        void setTagId(const std::string& tag_id);
+
+        const std::string& getVideoId();
+        const std::string& getTagId();
+    private:
+        friend class ::odb::access;
+        #pragma db id auto 
+        unsigned long long  _primaryKey; //主键
+        #pragma db not_null type("VARCHAR(128)")
+        std::string _video_id; //视频id
+        #pragma db not_null type("VARCHAR(128)")
+        std::string _tag_id; //标签id
+
+        //创建索引
+        #pragma db index("video_id_idx") member(_video_id)
+        #pragma db index("tag_id_idx") member(_tag_id)
+    };
+
+    //视频分类映射表
+    #pragma db object table("tbl_video_category_meta")
+    class suiVideoCategoryMeta
+    {
+    public:
+        using ptr = std::shared_ptr<suiVideoCategoryMeta>;
+
+        suiVideoCategoryMeta();
+
+        void setVideoId(const std::string& video_id);
+        void setCategoryId(const std::string& category_id);
+
+        const std::string& getVideoId();
+        const std::string& getCategoryId();
+    private:
+        friend class ::odb::access;
+        #pragma db id auto 
+        unsigned long long  _primaryKey; //主键
+        #pragma db not_null type("VARCHAR(128)")
+        std::string _video_id; //视频id
+        #pragma db not_null type("VARCHAR(128)")
+        std::string _category_id; //分类id
+
+        //创建索引
+        #pragma db index("video_id_idx") member(_video_id)
+        #pragma db index("category_id_idx") member(_category_id)
+    };
+
+    //视频弹幕信息表
+    #pragma db object table("tbl_video_subtitle_target")
+    class suiVideoSubtitleTarget
+    {
+    public:
+        using ptr = std::shared_ptr<suiVideoSubtitleTarget>;
+        suiVideoSubtitleTarget();
+
+        void setVideoId(const std::string& video_id);
+        void setUserId(const std::string& user_id);
+        void setBulletchat(const std::string& bulletchat);
+
+        std::string& getVideoId();
+        std::string& getUserId();
+        std::string& getBulletchat();
+    private:
+        friend class ::odb::access;
+        #pragma db id auto 
+        unsigned long long  _primaryKey; //主键
+        #pragma db not_null type("VARCHAR(128)")
+        std::string _bulletchat_id; //弹幕id
+        #pragma db not_null type("VARCHAR(128)")
+        std::string _video_id; //视频id
+        #pragma db not_null type("VARCHAR(128)")
+        std::string _user_id; //用户id
+        #pragma db type("TEXT")
+        std::string _bulletchat; //弹幕内容
+        #pragma db type("BIGINT UNSIGNED NOT NULL DEFAULT 0")
+        std::uint64_t _create_time; //创建时间
+    };
+
+
 }

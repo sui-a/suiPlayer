@@ -4,7 +4,7 @@
 #include <suiScaffold/suiQueue.hpp>
 #include <suiScaffold/log.h>
 #include "removeCache.hpp"
-#include "set_user_statistics.hpp"
+#include "db_set_async.hpp"
 #include "data.hpp"
 #include "data-odb.hxx"
 
@@ -15,7 +15,7 @@ namespace suiUserStatics
     {
     public:
         suiStatics(odb::database& db, sw::redis::Redis& redis, suiRemoveCache::RemoveCache::ptr dataSync
-            , suiSetUserStatistics::ptr setUserStatistics, sw::redis::Transaction& rtx);
+            , sw::redis::Transaction& rtx);
 
         //获取用户基础数据
         suiDataSql::UserHomepageBasicData::ptr getUserBasicData(const std::string& userId);
@@ -32,10 +32,6 @@ namespace suiUserStatics
 
         //更新缓存中的用户关注数
         void setUserFollowCountByChange(const std::string& userId, int followCountChange);
-
-        
-
-
     private:
         //从数据库查询用户基础信息
         suiDataSql::UserHomepageBasicData::ptr getUserBasicDataToDb(const std::string& userId);
@@ -46,7 +42,6 @@ namespace suiUserStatics
         void insertUserBasicDataToRedis(const std::string& userId, const suiDataSql::UserHomepageBasicData::ptr& data);
         //移除缓存
         void removeUserBaseDataToRedis(const std::string& userId);
-
 
         //发布移除消息
         void publishRemoveMessage(const std::vector<std::string>& curCacheKey);
@@ -72,8 +67,6 @@ namespace suiUserStatics
         sw::redis::Transaction& _rtx;
         //缓存操作客户端
         suiRemoveCache::RemoveCache::ptr _dataSync;
-        //设置用户播放量操作客户端
-        suiSetUserStatistics::ptr _setUserStatistics;
         
 
 

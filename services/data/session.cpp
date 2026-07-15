@@ -6,6 +6,7 @@ namespace suiSession
     const int sessionData::_cache_expire = 3600;
     const std::string sessionData::_field_session_id = "session_id";
     const std::string sessionData::_field_user_id = "user_id"; 
+    const std::string sessionData::_field_upload_time = "upload_time";  //上传时间字段
 
     sessionData::sessionData(odb::database& db, sw::redis::Redis& redis, suiRemoveCache::RemoveCache::ptr dataSync)
         : _db(db), _redis(redis), _dataSync(dataSync)
@@ -72,6 +73,8 @@ namespace suiSession
             //用户id不为空
             _data[_field_user_id] = session.getUserId().get();
         }
+        //上传时间
+        _data[_field_upload_time] = std::to_string(session.getUploadTime());
 
         _redis.hmset(key, _data.begin(), _data.end());
         _redis.expire(key, std::chrono::seconds(_cache_expire));
@@ -104,6 +107,8 @@ namespace suiSession
 
         if(_data.find(_field_user_id) != _data.end())
             ret->setUserId(_data[_field_user_id]);
+
+        ret->setUploadTime(std::stoull(_data[_field_upload_time]));
         return ret;
     }
 

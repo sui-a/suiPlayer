@@ -4,18 +4,17 @@ namespace suiUserStatics
 {
 
     const std::string suiStatics::cacheKeyPrefix = "user_basic_data_";
-    static const std::string mapKeyFansCount = "followers_count";
-    static const std::string mapKeyFollowCount = "follow_count";
-    static const std::string mapKeyVideoLikeCount = "video_like_count";
-    static const std::string mapKeyVideoPlayCount = "video_play_count";
-    const int _cache_expire_min = 1800;
-    const int _cache_expire_max = 3600;
-
+    const std::string suiStatics::mapKeyFansCount = "followers_count";
+    const std::string suiStatics::mapKeyFollowCount = "follow_count";
+    const std::string suiStatics::mapKeyVideoLikeCount = "video_like_count";
+    const std::string suiStatics::mapKeyVideoPlayCount = "video_play_count";
+    const int suiStatics::_cache_expire_min = 1800;
+    const int suiStatics::_cache_expire_max = 3600;
+ 
 
     suiStatics::suiStatics(odb::database& db, sw::redis::Redis& redis, suiRemoveCache::RemoveCache::ptr dataSync
-            , suiSetUserStatistics::ptr setUserStatistics, sw::redis::Transaction& rtx)   
-        : _db(db), _redis(redis), _dataSync(dataSync)
-        , _setUserStatistics(setUserStatistics), _rtx(rtx)
+            , sw::redis::Transaction& rtx)   
+        : _db(db), _redis(redis), _rtx(rtx), _dataSync(dataSync)
     {
 
     }
@@ -74,10 +73,9 @@ namespace suiUserStatics
         //从数据库获取用户的视频播放总数
         auto videoPlayCount = _db.query_one<suiDataSql::suiVideoPlayCountView>(odb::query<suiDataSql::suiVideoPlayCountView>::upload_user_id == userId);
         //从数据库获取点赞总量
-        auto likeCount = _db.query_one<suiDataSql::suiUserLikeCountView>(odb::query<suiDataSql::suiUserLikeCountView>::suiUserLikeMeta::user_id == userId);
+        auto likeCount = _db.query_one<suiDataSql::suiUserLikeCountView>(odb::query<suiDataSql::suiUserLikeCountView>::suiVideoMeta::upload_user_id == userId);
 
         //构造
-        std::shared_ptr<suiDataSql::UserHomepageBasicData> ret = std::make_shared<suiDataSql::UserHomepageBasicData>();
         std::shared_ptr<suiDataSql::UserHomepageBasicData> ret = std::make_shared<suiDataSql::UserHomepageBasicData>();
     
         // 使用三目运算符安全赋值：如果指针不为空就取 count，为空就给 0
@@ -202,6 +200,7 @@ namespace suiUserStatics
                 std::unordered_map<std::string, std::string> _data;
                 _redis.hgetall(rediskey, std::inserter(_data, _data.begin()));
                 
+                INFO("开始更新, 原来的值： {}， 修改为了 {}", std::stoll(_data[mapkey]), std::stoll(_data[mapkey]) + value);
                 _data[mapkey] = std::to_string(std::stoll(_data[mapkey]) + value);
                 //开始更新
                 _rtx.hmset(rediskey, _data.begin(), _data.end());

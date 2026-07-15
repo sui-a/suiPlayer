@@ -58,9 +58,13 @@ int main()
             INFO("创建事务");
             odb::transaction t(handler->begin());
 
+            //创建redis事务
+            auto rtx = redis->transaction(false, false);
+            auto rehandler = rtx.redis();
+
             //创建session
             INFO("创建会话数据");
-            suiSession::sessionData sedata(t.database(), *redis, removeCache);
+            suiSession::sessionData sedata(t.database(), rehandler, removeCache);
             
             INFO("添加会话数据");
             suiDataSql::suiSessionMeta session;
@@ -70,6 +74,7 @@ int main()
             INFO("添加会话操作");
             sedata.insert(session);
             t.commit();
+            rtx.exec();
             INFO("添加操作完成");
             std::cin.get();
         }

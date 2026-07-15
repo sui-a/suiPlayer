@@ -15,7 +15,6 @@ namespace suiUserIdentityRole
         using ptr = std::shared_ptr<UserIdentityRole>;
 
         UserIdentityRole(odb::database& db, sw::redis::Redis& redis, const suiRemoveCache::RemoveCache::ptr dataSync);
-        
         //增
         void insert(const std::string& user_id, suiDataSql::roleType role_type, suiDataSql::identityType identity_type);
 

@@ -63,6 +63,7 @@ namespace suiSession
         static const int _cache_expire;  //缓存过期时间，单位秒
         static const std::string _field_session_id;  //会话id字段
         static const std::string _field_user_id;  //用户id字段
+        static const std::string _field_upload_time;  //上传时间字段
 
         odb::database& _db;
         sw::redis::Redis& _redis;

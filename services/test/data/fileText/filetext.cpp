@@ -66,8 +66,7 @@ int main()
                 {
                     INFO("路径: {}", fileMeta->getPath().get());
                 }
-                if(!fileMeta->getSize().null())
-                    INFO("大小: {}", fileMeta->getSize().get());
+                INFO("大小: {}", fileMeta->getSize());
                 if(!fileMeta->getMimeType().null())
                     INFO("MIME类型: {}", fileMeta->getMimeType().get());
                 INFO("上传时间: {}", fileMeta->getUploadTimeString());
@@ -101,8 +100,7 @@ int main()
                 {
                     INFO("路径: {}", fileMeta->getPath().get());
                 }
-                if(!fileMeta->getSize().null())
-                    INFO("大小: {}", fileMeta->getSize().get());
+                INFO("大小: {}", fileMeta->getSize());
                 if(!fileMeta->getMimeType().null())
                     INFO("MIME类型: {}", fileMeta->getMimeType().get());
                 INFO("上传时间: {}", fileMeta->getUploadTimeString());

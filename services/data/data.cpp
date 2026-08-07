@@ -66,6 +66,26 @@ namespace suiDataSql
     }
     /*会话信息存储 end ===============================================================================================*/
 
+    /*会话状态 ===============================================================================================*/
+
+    namespace suiSessionStatus
+    {
+        std::string toString(SessionStatus status)
+        {
+            switch(status)
+            {
+                case SessionStatus::Guest:
+                    return "临时会话";
+                case SessionStatus::Normal:
+                    return "正式会话";
+                default:
+                    return "未知会话";
+            }
+        }
+    }
+
+    /*会话状态 end ===============================================================================================*/
+
     /*file ===============================================================================================*/
     suiFileMeta::suiFileMeta(const std::string& file_id, const std::string& _upload_user_id)
         : _file_id(file_id)
@@ -156,6 +176,7 @@ namespace suiDataSql
         ss << tm_info->tm_hour << ':' << tm_info->tm_min << ':' << tm_info->tm_sec;
         return ss.str();
     }
+    
     std::uint64_t suiFileMeta::getUploadTime() const
     {
         return _upload_time;
@@ -216,7 +237,15 @@ namespace suiDataSql
                 return suiDataSql::identityType::identityTypeUnknown; //未知身份
             }
         }
+
+        bool comparePermission(suiDataSql::identityType identity_type, suiDataSql::identityType identity_type2)
+        {
+            return static_cast<uint8_t>(identity_type) >= static_cast<uint8_t>(identity_type2);
+        }
+
     }
+
+    
     
     /*用户身份映射表 ===============================================================================================*/
     suiIdentityMeta::suiIdentityMeta()
@@ -292,11 +321,16 @@ namespace suiDataSql
         {
             switch (roleId) 
             {
-                case suiDataSql::roleType::roleTypeSuperAdmin: return 100;
-                case suiDataSql::roleType::roleTypeAdmin:      return 50;
-                case suiDataSql::roleType::roleTypeNormal:     return 10;
+                case suiDataSql::roleType::roleTypeSuperAdmin: return 3;
+                case suiDataSql::roleType::roleTypeAdmin:      return 2;
+                case suiDataSql::roleType::roleTypeNormal:     return 1;
                 default:                                       return 0; // Unknown 或 Guest
             }
+        }
+
+        bool comparePermission(suiDataSql::roleType role1, suiDataSql::roleType role2)
+        {
+            return static_cast<uint8_t>(role1) >= static_cast<uint8_t>(role2);
         }
     }
     
@@ -509,7 +543,41 @@ namespace suiDataSql
     }
     /*用户表 end ===============================================================================================*/
 
-        /*用户身份角色关系表 ===============================================================================================*/
+    /*盐信息表 ===============================================================================================*/
+
+    suiSaltMeta::suiSaltMeta()
+    {
+
+    }
+
+    void suiSaltMeta::setUserId(const std::string& user_id)
+    {
+        _user_id = user_id;
+    }
+
+    void suiSaltMeta::setSalt(const std::string& salt)
+    {
+        _salt.clear();
+        for(auto it : salt)
+            _salt.push_back(it);
+    }
+
+    void suiSaltMeta::setSalt(const std::vector<char>& salt)
+    {
+        _salt = salt;
+    }
+
+    const std::string& suiSaltMeta::getUserId()
+    {
+        return _user_id;
+    }   
+    const std::vector<char>& suiSaltMeta::getSalt()
+    {
+        return _salt;
+    }
+    /*盐信息表 end ===============================================================================================*/
+
+    /*用户身份角色关系表 ===============================================================================================*/
     suiUserIdIdentityRoleMeta::suiUserIdIdentityRoleMeta()
     {
 
@@ -772,73 +840,36 @@ namespace suiDataSql
             (isDesc ? " DESC" : " ASC");
     }
     /*数据库工具类 end =====================================================================================================*/
-    /*标签信息类      =====================================================================================================*/
+    
+    /*视频标签映射类      =====================================================================================================*/
 
-    suiTagTarget::suiTagTarget()
+    suiTagMeta::suiTagMeta()
     {
 
     }
 
-    void suiTagTarget::setTagId(const std::string& tag_id)
+    void suiTagMeta::setTagDescription(const std::string& description)
+    {
+        _tag_description = description;
+    }
+
+    void suiTagMeta::setTagId(long long tag_id)
     {
         _tag_id = tag_id;
     }
-    void suiTagTarget::setTagName(const std::string& tag_name)
-    {
-        _tag_name = tag_name;
-    }
-    void suiTagTarget::setTagDescription(const std::string& tag_description)
-    {
-        _tag_description = tag_description;
-    }
 
-    std::string& suiTagTarget::getTagId()
+    long long suiTagMeta::getTagId()
     {
         return _tag_id;
     }
-    std::string& suiTagTarget::getTagName()
-    {
-        return _tag_name;
-    }
-    odb::nullable<std::string>& suiTagTarget::getTagDescription()
+
+    const std::string& suiTagMeta::getTagDescription()
     {
         return _tag_description;
     }
-    /*标签信息类 end =====================================================================================================*/
-    /*分类信息类      =====================================================================================================*/
+    /*视频标签映射类 end =====================================================================================================*/
 
-    suiCategoryTarget::suiCategoryTarget()
-    {
-
-    }
-
-    void suiCategoryTarget::setCategoryId(const std::string& category_id)
-    {
-        _category_id = category_id;
-    }
-    void suiCategoryTarget::setCategoryName(const std::string& category_name)
-    {
-        _category_name = category_name;
-    }
-    void suiCategoryTarget::setCategoryDescription(const std::string& category_description)
-    {
-        _category_description = category_description;
-    }
-
-    std::string& suiCategoryTarget::getCategoryId()
-    {
-        return _category_id;
-    }
-    std::string& suiCategoryTarget::getCategoryName()
-    {
-        return _category_name;
-    }
-    odb::nullable<std::string>& suiCategoryTarget::getCategoryDescription()
-    {
-        return _category_description;
-    }
-    /*分类信息类 end =====================================================================================================*/
-    /*视频标签映射类      =====================================================================================================*/
+    /*视频分类映射类      =====================================================================================================*/
 
     suiVideoTagMeta::suiVideoTagMeta()
     {
@@ -849,7 +880,8 @@ namespace suiDataSql
     {
         _video_id = video_id;
     }
-    void suiVideoTagMeta::setTagId(const std::string& tag_id)
+
+    void suiVideoTagMeta::setTagId(long long tag_id)
     {
         _tag_id = tag_id;
     }
@@ -858,36 +890,12 @@ namespace suiDataSql
     {
         return _video_id;
     }
-    const std::string& suiVideoTagMeta::getTagId()
+
+    long long suiVideoTagMeta::getTagId()
     {
         return _tag_id;
     }
-    /*视频标签映射类 end =====================================================================================================*/
 
-    /*视频分类映射类      =====================================================================================================*/
-
-    suiVideoCategoryMeta::suiVideoCategoryMeta()
-    {
-
-    }
-
-    void suiVideoCategoryMeta::setVideoId(const std::string& video_id)
-    {
-        _video_id = video_id;
-    }
-    void suiVideoCategoryMeta::setCategoryId(const std::string& category_id)
-    {
-        _category_id = category_id;
-    }
-
-    const std::string& suiVideoCategoryMeta::getVideoId()
-    {
-        return _video_id;
-    }
-    const std::string& suiVideoCategoryMeta::getCategoryId()
-    {
-        return _category_id;
-    }
     /*视频分类映射类 end =====================================================================================================*/
 
     /*视频弹幕信息类      =====================================================================================================*/
@@ -905,22 +913,53 @@ namespace suiDataSql
     {
         _user_id = user_id;
     }
+    void suiVideoSubtitleTarget::setBulletchatId(const std::string& bulletchat_id)
+    {
+        _bulletchat_id = bulletchat_id;
+    }
     void suiVideoSubtitleTarget::setBulletchat(const std::string& bulletchat)
     {
         _bulletchat = bulletchat;
     }
+    void suiVideoSubtitleTarget::setSendByVideoTime(std::uint64_t send_by_video_time)
+    {
+        _send_by_video_time = send_by_video_time;
+    }
 
-    std::string& suiVideoSubtitleTarget::getVideoId()
+    void suiVideoSubtitleTarget::setCreateTime(std::uint64_t create_time)
+    {
+        _create_time = create_time;
+    }
+    void suiVideoSubtitleTarget::setCreateTime()
+    {
+        _create_time = suiTime::suiTimeOperater::get_timestamp_sec();
+    }
+
+    const std::string& suiVideoSubtitleTarget::getVideoId()
     {
         return _video_id;
     }
-    std::string& suiVideoSubtitleTarget::getUserId()
+    const std::string& suiVideoSubtitleTarget::getUserId()
     {
         return _user_id;
     }
-    std::string& suiVideoSubtitleTarget::getBulletchat()
+    const std::string& suiVideoSubtitleTarget::getBulletchatId()
+    {
+        return _bulletchat_id;
+    }
+    const std::string& suiVideoSubtitleTarget::getBulletchat()
     {
         return _bulletchat;
+    }
+
+    std::uint64_t suiVideoSubtitleTarget::getSendByVideoTime()
+    {
+        return _send_by_video_time;
+    }
+
+    std::uint64_t suiVideoSubtitleTarget::getCreateTime()
+    {
+        return _create_time;
     }
     /*视频弹幕信息类 end =====================================================================================================*/
 

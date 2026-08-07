@@ -50,7 +50,7 @@ namespace suiUserFollow
         std::vector<suiDataSql::suiUserFollowMeta> followList;
         for (auto& meta : ret)
         {
-            followList.push_back(meta);
+            followList.push_back((meta));
         }
         
         return followList;

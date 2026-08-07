@@ -9,25 +9,17 @@ project(suiFileText
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF) # 禁用编译器特有扩展，确保跨平台
+#set(CMAKE_BUILD_TYPE Debug)
 
 add_compile_options(-Wall -Wextra -Wpedantic -O3) # Linux/Mac 环境，开启O3优化
 
 #创建文件
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src)
-file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/log)
 
 #收集源文件头文件
-file(GLOB_RECURSE CUR_HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/../../../data/*.hpp")
-file(GLOB_RECURSE CUR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/../../../data/*.cpp")
-
-#将源文件头文件拷贝进输出目录
-file(COPY ${CUR_HEADERS} ${CUR_SOURCES}
-  DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/src
-)
-
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/filetext.cpp
-  DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/src
-)
+file(GLOB CUR_HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/../../../data/*.hpp" "${CMAKE_CURRENT_SOURCE_DIR}/../../../util/*.hpp")
+file(GLOB CUR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/../../../data/*.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/../../../util/*.cpp")
+file(GLOB GOAL_FILES "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
 
 #编译odb与proto
 #收集所有proto文件路径
@@ -46,9 +38,10 @@ execute_process(
 if(protoc_ret)
     message(FATAL_ERROR  "protoc失败: ${protoc_stderr}")
 endif()
+
 #开始编译odb
 set(ODB_HEADERS
-    "data.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../../../data/data.hpp"
 )
 #设置odb输出目录
 set(ODB_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/src)
@@ -60,7 +53,8 @@ foreach(odb_header ${ODB_HEADERS})
     execute_process(
         COMMAND ${ODB_EXECUTABLE}
                 --database mysql --generate-query  --generate-schema --std c++11  --schema-format sql --schema-format embedded
-                -I${CMAKE_CURRENT_BINARY_DIR}/src ${CMAKE_CURRENT_BINARY_DIR}/src/${odb_header}
+                -I${CMAKE_CURRENT_BINARY_DIR}/src ${odb_header}
+                -I${CMAKE_CURRENT_SOURCE_DIR}/../../../util ${odb_header}
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src # 设置工作目录为src
         RESULT_VARIABLE protoc_ret         # 将执行结果代码（0代表成功，非0代表失败）赋值给 protoc_ret
         OUTPUT_VARIABLE protoc_stdout      # 捕获标准输出
@@ -72,20 +66,19 @@ foreach(odb_header ${ODB_HEADERS})
 endforeach()
 
 #收集源文件
-file(GLOB_RECURSE CUR_SOURCES 
-    "${CMAKE_CURRENT_BINARY_DIR}/src/*.cpp"
-    "${CMAKE_CURRENT_BINARY_DIR}/src/*.hpp"
-    "${CMAKE_CURRENT_BINARY_DIR}/src/*.cc"
+file(GLOB_RECURSE MY_GEN_ODB_CPP 
+    "${CMAKE_CURRENT_BINARY_DIR}/src/*.cxx"
     "${CMAKE_CURRENT_BINARY_DIR}/src/*.h"
-)
-#定义输出包
-set(MY_GEN_ODB_CPP 
-    "${CMAKE_CURRENT_BINARY_DIR}/src/data-odb.cxx"
-    "${CMAKE_CURRENT_BINARY_DIR}/src/data-odb.hxx"
+    "${CMAKE_CURRENT_BINARY_DIR}/src/*.hpp"
+    "${CMAKE_CURRENT_BINARY_DIR}/src/*.cpp"
+    "${CMAKE_CURRENT_BINARY_DIR}/src/*.cxx"
+    "${CMAKE_CURRENT_BINARY_DIR}/src/*.cc"
+    "${CMAKE_CURRENT_BINARY_DIR}/src/*.hxx"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../../../util/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../../../util/*.hpp"
 )
 
-add_executable(${PROJECT_NAME} ${CUR_SOURCES} ${MY_GEN_ODB_CPP})
-target_compile_options(${PROJECT_NAME} PRIVATE -Wno-unknown-pragmas)
+add_executable(${PROJECT_NAME} ${CUR_SOURCES} ${MY_GEN_ODB_CPP} ${GOAL_FILES})
 
 #寻找依赖
 find_package(suiScaffold REQUIRED)
@@ -101,9 +94,9 @@ set(libs jsoncpp protobuf spdlog
 )
 
 #添加头文件目录
-target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/src)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/../../../data ${CMAKE_CURRENT_SOURCE_DIR}/../../../util)
 target_link_libraries(${PROJECT_NAME}
   PRIVATE
   suiScaffold::suiScaffold
-    ${libs}
+  ${libs}
 )

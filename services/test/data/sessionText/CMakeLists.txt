@@ -17,8 +17,8 @@ add_compile_options(-Wall -Wextra -Wpedantic -O3) # Linux/Mac 环境，开启O3�
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src)
 
 #收集源文件头文件
-file(GLOB CUR_HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/../../../data/*.hpp")
-file(GLOB CUR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/../../../data/*.cpp")
+file(GLOB CUR_HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/../../../data/*.hpp" "${CMAKE_CURRENT_SOURCE_DIR}/../../../util/*.hpp")
+file(GLOB CUR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/../../../data/*.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/../../../util/*.cpp")
 file(GLOB GOAL_FILES "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
 
 #编译odb与proto
@@ -54,6 +54,7 @@ foreach(odb_header ${ODB_HEADERS})
         COMMAND ${ODB_EXECUTABLE}
                 --database mysql --generate-query  --generate-schema --std c++11  --schema-format sql --schema-format embedded
                 -I${CMAKE_CURRENT_BINARY_DIR}/src ${odb_header}
+                -I${CMAKE_CURRENT_SOURCE_DIR}/../../../util ${odb_header}
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src # 设置工作目录为src
         RESULT_VARIABLE protoc_ret         # 将执行结果代码（0代表成功，非0代表失败）赋值给 protoc_ret
         OUTPUT_VARIABLE protoc_stdout      # 捕获标准输出
@@ -73,6 +74,8 @@ file(GLOB_RECURSE MY_GEN_ODB_CPP
     "${CMAKE_CURRENT_BINARY_DIR}/src/*.cxx"
     "${CMAKE_CURRENT_BINARY_DIR}/src/*.cc"
     "${CMAKE_CURRENT_BINARY_DIR}/src/*.hxx"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../../../util/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../../../util/*.hpp"
 )
 
 add_executable(${PROJECT_NAME} ${CUR_SOURCES} ${MY_GEN_ODB_CPP} ${GOAL_FILES})
@@ -91,7 +94,7 @@ set(libs jsoncpp protobuf spdlog
 )
 
 #添加头文件目录
-target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/../../../data)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/../../../data ${CMAKE_CURRENT_SOURCE_DIR}/../../../util)
 target_link_libraries(${PROJECT_NAME}
   PRIVATE
   suiScaffold::suiScaffold

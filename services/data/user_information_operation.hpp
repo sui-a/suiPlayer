@@ -30,12 +30,20 @@ namespace suiUserInformation
         bool isExistByEmail(const std::string& emailm);
         //用户密码验证
         bool authenticationByPassword(const std::string& user_id, const std::string& password);
+        //获取用户的盐
+        //通过邮箱验证密码
+        bool authenticationByPasswordByEmail(const std::string& email, const std::string& password);
         //获取用户基础信息
         suiDataSql::suiUsrMeta::ptr getUserInfoById(const std::string& user_id);
+        suiDataSql::suiUsrMeta::ptr getUserInfoByEmail(const std::string& email);
         //分页查询某个特定身份和状态的用户 参数：状态 身份 第几页 一页大小
         suiDataSql::userInfoList::ptr getUserInfoListByTypeAndStatus(suiDataSql::userStatus status, suiDataSql::identityType type, int page, int pageSize);
+        //通过用户名查询
+        suiDataSql::userInfoList::ptr getUserInfoListByUsername(const std::string& username);
         //分页查询某个特定身份和状态的用户 参数：角色 身份 第几页 一页大小
         suiDataSql::userInfoList::ptr getUserInfoListByTypeAndStatus(suiDataSql::roleType role, suiDataSql::identityType type, int page, int pageSize);
+        //全属性查询
+        suiDataSql::userInfoList::ptr getUserInfoListByTypeAndStatus(suiDataSql::roleType role, suiDataSql::userStatus status, suiDataSql::identityType type, int page, int pageSize);
         //修改头像接口， 返回原头像id，交给外界处理（如删除） 参数：用户id，新头像id
         std::string setAvatar(const std::string& user_id, const std::string& avatar_id);
         //修改用户状态
@@ -47,7 +55,7 @@ namespace suiUserInformation
         //判断用户是否是启用状态
         bool isEnabled(const std::string& user_id);
         //修改管理员信息 修改B端用户的管理名称，备注以及状态
-        void setAdminInfo(const std::string& user_id, const std::string& admin_name, const std::string& Remark, suiDataSql::userStatus);
+        void setAdminInfo(const std::string& user_id, const std::string& admin_name, const std::string& Remark);
         //账号注销
         void deleteUser(const std::string& user_id);
 
@@ -68,6 +76,8 @@ namespace suiUserInformation
         suiDataSql::userInfoList::ptr getUserInfoListByTypeAndStatusToDb(suiDataSql::userStatus status, suiDataSql::identityType type, suiDataSql::roleType role, int page, int pageSize);
         //通过状态身份类型从数据库中获取用户信息
         suiDataSql::userInfoList::ptr getUserInfoListByTypeAndStatusToDb(suiDataSql::userStatus status, suiDataSql::identityType type, int page, int pageSize);
+        //通过状态身份角色类型从数据库中获取用户信息
+        suiDataSql::userInfoList::ptr getUserInfoListByTypeAndStatusToDb(suiDataSql::roleType role, suiDataSql::userStatus status, suiDataSql::identityType type, int page, int pageSize);
         //通过角色身份类型从数据库中获取用户信息
         suiDataSql::userInfoList::ptr getUserInfoListByTypeAndStatusToDb(suiDataSql::roleType role, suiDataSql::identityType type, int page, int pageSize);
         //修改数据库中用户信息 //本地无权更新用户状态，密码，头像
@@ -83,7 +93,7 @@ namespace suiUserInformation
         //单向数据库更新用户名称
         void updateUserNameToDb(const std::string& user_id, const std::string& user_new_name);
         //更新管理员标准信息接口
-        void setAdminInfoToDb(const std::string& user_id, const std::string& admin_name, const std::string& Remark, suiDataSql::userStatus status);
+        void setAdminInfoToDb(const std::string& user_id, const std::string& admin_name, const std::string& Remark);
         //从数据库中删除用户信息
         void deleteUserToDb(const std::string& user_id);
 
@@ -126,8 +136,6 @@ namespace suiUserInformation
         static const std::string _userDescriptionKey;
         static const std::string _userStatusKey;
         static const std::string _userUploadTimeKey;
-
-
     };
 
 

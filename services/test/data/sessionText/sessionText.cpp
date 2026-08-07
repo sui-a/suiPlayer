@@ -100,7 +100,7 @@ int main()
             if (!session->getUserId().null()) 
                 INFO("会话数据用户ID: {}", session->getUserId().get());
 
-            INFO("会话数据上传时间: {}", session->getUploadTimeString());
+            INFO("会话数据上传时间: {}", session->getUploadTime());
             std::cin.get();
         }
         
@@ -126,7 +126,7 @@ int main()
             if (!session->getUserId().null()) 
                 INFO("会话数据用户ID: {}", session->getUserId().get());
 
-            INFO("会话数据上传时间: {}", session->getUploadTimeString());
+            INFO("会话数据上传时间: {}", session->getUploadTime());
 
             session->setUserId(std::string("33456"));
             sedata.update(*session);
@@ -155,7 +155,7 @@ int main()
             if (!session->getUserId().null()) 
                 INFO("会话数据用户ID: {}", session->getUserId().get());
 
-            INFO("会话数据上传时间: {}", session->getUploadTimeString());
+            INFO("会话数据上传时间: {}", session->getUploadTime());
             t.commit();
             INFO("更新操作确认完成");
             std::cin.get();

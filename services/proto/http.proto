@@ -18,24 +18,26 @@ message HttpBody {
 //请求路径: /httpServices/tempLogin
 service httpServices {
   //用户服务
-  rpc tempLogin(tempLoginReq) returns (tempLoginRsp);
-  rpc sessionLogin(sessionLoginReq) returns (sessionLoginRsp);
-  rpc getEmailCode(getEmailCodeReq) returns (getEmailCodeRsp);
-  rpc emailCodeLogin(emailNumberLoginReq) returns (emailNumberLoginRsp);
-  rpc passwordLogin(passwordLoginReq) returns (passwordLoginRsp);
-  rpc logout(logoutReq) returns (logoutRsp);
-  rpc setUserAvatar(setUserAvatarReq) returns (setUserAvatarRsp);
-  rpc setUserNickname(setUserNicknameReq) returns (setUserNicknameRsp);
-  rpc setPassword(setPasswordReq) returns (setPasswordRsp);
-  rpc setUserStatus(setUserStatusReq) returns (setUserStatusRsp);
-  rpc getUserInfo(userInfoReq) returns (userInfoRsp);
-  rpc newFollow(newFollowReq) returns (newFollowRsp);
-  rpc DelFollow(DelFollowReq) returns (DelFollowRsp);
-  rpc NewAdmin(NewAdminReq) returns (NewAdminRsp);
-  rpc DelAdmin(DelAdminReq) returns (DelAdminRsp);
-  rpc SetAdmin(SetAdminReq) returns (SetAdminRsp);
-  rpc GetAdmin(GetAdminReq) returns (GetAdminRsp);
-  rpc GetAdminList(GetAdminListReq) returns (GetAdminListRsp);
+  rpc tempLogin(httpTempLoginReq) returns (HttpBody);
+  rpc sessionLogin(httpSessionLoginReq) returns (HttpBody);
+  rpc getEmailCode(httpGetEmailCodeReq) returns (HttpBody);
+  rpc emailCodeLogin(httpEmailNumberLoginReq) returns (HttpBody);
+  rpc passwordLogin(httpPasswordLoginReq) returns (HttpBody);
+  rpc logout(httpLogoutReq) returns (HttpBody);
+  rpc setUserAvatar(httpSetUserAvatarReq) returns (HttpBody);
+  rpc setUserNickname(httpSetUserNicknameReq) returns (HttpBody);
+  rpc setPassword(httpSetPasswordReq) returns (HttpBody);
+  rpc setUserStatus(httpSetUserStatusReq) returns (HttpBody);
+  rpc getUserInfo(httpUserInfoReq) returns (HttpBody);
+  rpc newFollow(httpNewFollowReq) returns (HttpBody);
+  rpc DelFollow(httpDelFollowReq) returns (HttpBody);
+  rpc NewAdmin(httpNewAdminReq) returns (HttpBody);
+  rpc DelAdmin(httpDelAdminReq) returns (HttpBody);
+  rpc SetAdmin(httpSetAdminReq) returns (HttpBody);
+  rpc GetAdmin(httpGetAdminReq) returns (HttpBody);
+  rpc GetAdminList(httpGetAdminListReq) returns (HttpBody);
+  rpc SetSalt(httpSetSaltReq) returns (HttpBody);
+  rpc GetSalt(httpGetSaltReq) returns (HttpBody);
 
   //文件服务接口
   //图像上下传接口
@@ -49,21 +51,21 @@ service httpServices {
   rpc getFileData(httpInitGetFileDataReq) returns (HttpBody);
   rpc downloadFile(httpDownloadFileReq) returns (HttpBody);
 
-  //视频接口
-  rpc newVideo(newVideoReq) returns (newVideoRsp);
-  rpc deleteVideo(deleteVideoReq) returns (deleteVideoRsp);
-  rpc isLikeVideo(isLikeVideoReq) returns (isLikeVideoRsp);
-  rpc setLikeVideo(setLikeVideoReq) returns (setLikeVideoRsp);
-  rpc playVideo(playVideoReq) returns (playVideoRsp);
-  rpc addVideoSubtitle(addVideoSubtitleReq) returns (addVideoSubtitleRsp);
-  rpc getVideoSubtitle(getVideoSubtitleReq) returns (getVideoSubtitleRsp);
-  rpc reviewVideo(checkVideoReq) returns (checkVideoRsp);
-  rpc publishVideo(publishVideoReq) returns (publishVideoRsp);
-  rpc removeShelvesVideo(removeShelvesVideoReq) returns (removeShelvesVideoRsp);
-  rpc getUserVideoList(getUserVideoListReq) returns (getUserVideoListRsp);
-  rpc getStatusVideoList(getStatusVideoListReq) returns (getStatusVideoListRsp);
-  rpc getHomeRandomVideoList(getHomeRandomVideoListReq) returns (getHomeRandomVideoListRsp);
-  rpc getCategoryVideoList(getCategoryVideoListReq) returns (getCategoryVideoListRsp);
-  rpc getTagVideoList(getTagVideoListReq) returns (getTagVideoListRsp);
-  rpc searchVideoList(searchVideoListReq) returns (searchVideoListRsp);
+  //视频接口 //后续替换为http对外接口
+  rpc newVideo(newVideoReq) returns (HttpBody);
+  rpc deleteVideo(deleteVideoReq) returns (HttpBody);
+  rpc isLikeVideo(isLikeVideoReq) returns (HttpBody);
+  rpc setLikeVideo(setLikeVideoReq) returns (HttpBody);
+  rpc playVideo(playVideoReq) returns (HttpBody);
+  rpc addVideoSubtitle(addVideoSubtitleReq) returns (HttpBody);
+  rpc getVideoSubtitle(getVideoSubtitleReq) returns (HttpBody);
+  rpc reviewVideo(checkVideoReq) returns (HttpBody);
+  rpc publishVideo(publishVideoReq) returns (HttpBody);
+  rpc removeShelvesVideo(removeShelvesVideoReq) returns (HttpBody);
+  rpc getUserVideoList(getUserVideoListReq) returns (HttpBody);
+  rpc getStatusVideoList(getStatusVideoListReq) returns (HttpBody);
+  rpc getHomeRandomVideoList(getHomeRandomVideoListReq) returns (HttpBody);
+  rpc getCategoryVideoList(getCategoryVideoListReq) returns (HttpBody);
+  rpc getTagVideoList(getTagVideoListReq) returns (HttpBody);
+  rpc searchVideoList(searchVideoListReq) returns (HttpBody);
 }

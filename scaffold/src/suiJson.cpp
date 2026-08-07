@@ -1,8 +1,8 @@
 #include "suiJson.hpp"
 
-namespace sui
+namespace suiUtil
 {
-    static std::optional<std::string> serialize(const Json::Value& val)
+    std::optional<std::string> suiJson::serialize(const Json::Value& val)
     {
         //构建序列化类
         Json::StreamWriterBuilder builder;
@@ -19,7 +19,8 @@ namespace sui
             return std::nullopt;
         return ss.str();
     }
-    static std::optional<Json::Value> unserialize(const std::string& inp)
+
+    std::optional<Json::Value> suiJson::unserialize(const std::string& inp)
     {
         //构建read类的构造对象
         Json::CharReaderBuilder builder;

@@ -3,7 +3,6 @@
 #include <suiScaffold/suiSerSearch.hpp>
 #include <suiScaffold/suiodb.hpp>
 #include <suiScaffold/suiRedis.hpp>
-#include "db_set_async.hpp"
 #include "user_data_statistics.hpp"
 #include "user_information_operation.hpp"
 #include "user_Identity_role.hpp"
@@ -387,6 +386,48 @@ void deleteUserAccount(std::shared_ptr<odb::database> curDb, std::shared_ptr<sw:
     }
 }
 
+void selectusers(std::shared_ptr<odb::database> curDb, std::shared_ptr<sw::redis::Redis> curRedis
+            , suiQueue::MQClient::ptr _mqClienrt, suiRemoveCache::RemoveCache::ptr curRemoveCache
+        , const std::string& username)
+{
+    try
+    {
+        //创建事务
+        odb::transaction t(curDb->begin());
+        auto rtx = curRedis->transaction(false, false);
+
+        {
+            //删除用户元信息
+            //创建操作对象
+            auto handle = std::make_shared<suiUserInformation::suiUserInformationOperation>(t, rtx, curRemoveCache);
+            auto ret = handle->getUserInfoListByUsername(username);
+            INFO("用户一共有： {} 个", ret->total);
+            for(auto& it : ret->list)
+            {
+                INFO("用户id: {} ", it.getUserId());
+            }
+        }
+    }
+    catch (const odb::exception& e)
+    {
+        // 捕获 ODB 数据库异常
+        ERROR("数据库异常： {}", e.what());
+        return;
+    }
+    catch (const sw::redis::Error& e) 
+    {
+        // 捕获 Redis 异常
+        ERROR("redis异常： {}", e.what());
+        return;
+    }
+    catch (...)
+    {
+        ERROR("未知异常");
+        return;
+    }
+}
+
+
 
 int main(int argc, char* argv[])
 {
@@ -433,6 +474,14 @@ int main(int argc, char* argv[])
         curInsert(curDb, curRedis, _mqClienrt, curRemoveCache, "u_9999", "delete_me@test.com", suiDataSql::identityType::identityTypeNormal, suiDataSql::roleType::roleTypeNormal);
     }
     INFO("数据添加测试结束，点击回车开始下一步");
+    std::cin.get();
+    INFO("开始进行多数据查询");
+    {
+        //查询所有用户
+        selectusers(curDb, curRedis, _mqClienrt, curRemoveCache, "新用户");
+    }
+
+    INFO("多数据查询结束，点击回车开始下一步");
     std::cin.get();
     INFO("开始进行数据获取判断测试");
     {

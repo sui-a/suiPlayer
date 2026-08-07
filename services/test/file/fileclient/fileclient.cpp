@@ -11,38 +11,19 @@
 #include "base.pb.h"
 #include "file.pb.h"
 
-//消息队列地址
-DEFINE_string(file_server_amqp_addr, "amqp://sui:suisuipingan@localhost:8082//", "amqp地址");
-
-//文件删除队列配置
-DEFINE_string(file_server_remove_exchange, "file_remove_exchange", "文件删除交换机名称");
-DEFINE_string(file_server_remove_exchange_type, "direct", "文件删除队列交换机类型");
-DEFINE_string(file_server_remove_queue, "file_remove_queue", "文件删除队列名称");
-DEFINE_string(file_server_remove_bind_key, "file_remove_key", "文件删除队列绑定键");
-
 //etcd地址
-DEFINE_string(file_server_registry_center, "127.0.0.1:8084", "file_server注册中心地址");
+DEFINE_string(registry_center, "127.0.0.1:8084", "注册中心地址");
 DEFINE_string(file_server_name, "file_server", "file_server服务名称");
 
 int main(int argc, char* argv[])
 {
     //初始化日志模块
     suiUtil::suiLogInitDefault();
-    
     //初始化gflags
     google::ParseCommandLineFlags(&argc, &argv, true);
-    //创建clientMq
-    suiQueue::MQClient::ptr _mqClienrt = std::make_shared<suiQueue::MQClient>(FLAGS_file_server_amqp_addr);
-    //创建发布者
-    suiQueue::queueSetting pubset;
-    pubset.exchange = FLAGS_file_server_remove_exchange;
-    pubset.exchangeType = FLAGS_file_server_remove_exchange_type;
-    pubset.queue = FLAGS_file_server_remove_queue;
-    pubset.bindKey = FLAGS_file_server_remove_bind_key;
-    suiQueue::suiPublisher::ptr _publisher = std::make_shared<suiQueue::suiPublisher>(_mqClienrt, pubset);
     //创建服务搜索
     suiRpc::Channels::Ptr _channels = std::make_shared<suiRpc::Channels>(FLAGS_file_server_name);
-    suiEtcd::serSearch::ptr _search = std::make_shared<suiEtcd::serSearch>(FLAGS_file_server_name, FLAGS_file_server_registry_center
+    suiEtcd::serSearch::ptr _search = std::make_shared<suiEtcd::serSearch>(FLAGS_file_server_name, FLAGS_registry_center
         , [_channels](std::string serName, std::string addr){
         _channels->insert(addr);
         INFO("添加节点: {}", addr);
@@ -50,6 +31,7 @@ int main(int argc, char* argv[])
         INFO("删除节点: {}", addr);
         _channels->remove(addr);
     });
+
     //开始服务发现
     _search->search();
 

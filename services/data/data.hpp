@@ -47,6 +47,23 @@ namespace suiDataSql{
         #pragma db index("user_id_idx") member(_user_id) //用于根据用户id查询
     };
 
+    //会话状态
+    enum class SessionStatus
+    {
+        //未知状态，用于初始化
+        Unknown = 0, //说明出现错误
+        //临时会话
+        Guest = 1,
+        //正式会话
+        Normal = 2,
+    };
+
+    namespace suiSessionStatus
+    {
+        //切换成string类型
+        std::string toString(SessionStatus status);
+    }
+
     //构造视图
     #pragma db view object(suiSessionMeta = session) query((?))
     struct suiSessionPtr
@@ -137,6 +154,8 @@ namespace suiDataSql{
         //身份字符串切换
         std::string identityTypeToString(suiDataSql::identityType identity_type);
         suiDataSql::identityType stringToIdentityType(const std::string& identityTypeStr);
+        //比较身份
+        bool comparePermission(suiDataSql::identityType identity_type, suiDataSql::identityType identity_type2);
     }
 
     //用户身份映射表
@@ -190,6 +209,8 @@ namespace suiDataSql{
         suiDataSql::roleType stringToRoleType(const std::string& roleTypeStr);
         //获取权限级别
         int getWeight(suiDataSql::roleType roleId);
+        //比较
+        bool comparePermission(suiDataSql::roleType role1, suiDataSql::roleType role2);
     }
 
     //角色信息表
@@ -326,6 +347,32 @@ namespace suiDataSql{
         #pragma db index("user_name_idx") member(_user_name) //用于根据用户名查询
         #pragma db index("administrator_name_idx") member(_administrator_name) //用于根据管理员用户名查询
         #pragma db index("user_status_idx") member(_user_status) //用于根据用户状态查询
+    };
+
+    //盐信息表
+    #pragma db object table("tbl_salt_meta")
+    class suiSaltMeta
+    {
+    public:
+        using ptr = std::shared_ptr<suiSaltMeta>;
+
+        suiSaltMeta();
+        ~suiSaltMeta() = default;
+
+        void setUserId(const std::string& user_id);
+        void setSalt(const std::string& salt);
+        void setSalt(const std::vector<char>& salt);
+
+        const std::string& getUserId();
+        const std::vector<char>& getSalt();
+    private:
+        friend class ::odb::access;
+        #pragma db id auto 
+        unsigned long long  _primaryKey; //主键
+        #pragma db not_null type("VARCHAR(128)")
+        std::string _user_id; //用户id
+        #pragma db not_null type("VARBINARY(64)")
+        std::vector<char> _salt; //盐
     };
 
     //用户身份角色关系表
@@ -567,6 +614,15 @@ namespace suiDataSql{
         using ptr = std::shared_ptr<UserHomepageBasicData>;
     };
 
+    //总数视图
+    #pragma db view object(suiUsrMeta) object(suiUserIdIdentityRoleMeta: suiUserIdIdentityRoleMeta::_user_id == suiUsrMeta::_user_id) query((?))
+    struct userInfoTotalView
+    {
+        //总数
+        #pragma db column("COUNT(*)")
+        int total;
+    };
+
     //批量返回用户info列表
     struct userInfoList
     {
@@ -610,64 +666,33 @@ namespace suiDataSql{
         std::string _code;
     };
 
-    //标签表
-    #pragma db object table("tbl_tag_target")
-    class suiTagTarget
-    {
-    public:
-        using ptr = std::shared_ptr<suiTagTarget>;
-
-        suiTagTarget();
-
-        void setTagId(const std::string& tag_id);
-        void setTagName(const std::string& tag_name);
-        void setTagDescription(const std::string& tag_description);
-
-        std::string& getTagId();
-        std::string& getTagName();
-        odb::nullable<std::string>& getTagDescription();
-    private:
-        friend class ::odb::access;
-        #pragma db id auto 
-        unsigned long long  _primaryKey; //主键
-        #pragma db not_null type("VARCHAR(128)") unique
-        std::string _tag_id; //标签id
-        #pragma db not_null type("VARCHAR(32)")
-        std::string _tag_name; //标签名称
-        #pragma db type("TEXT")
-        odb::nullable<std::string> _tag_description; //标签描述
-    };
-
-    //分类表
-    #pragma db object table("tbl_category_target")
-    class suiCategoryTarget
-    {
-    public:
-        using ptr = std::shared_ptr<suiCategoryTarget>;
-
-        suiCategoryTarget();
-
-        void setCategoryId(const std::string& category_id);
-        void setCategoryName(const std::string& category_name);
-        void setCategoryDescription(const std::string& category_description);
-
-        std::string& getCategoryId();
-        std::string& getCategoryName();
-        odb::nullable<std::string>& getCategoryDescription();
-    private:
-        friend class ::odb::access;
-        #pragma db id auto 
-        unsigned long long  _primaryKey; //主键
-        #pragma db not_null type("VARCHAR(128)") unique
-        std::string _category_id; //分类id
-        #pragma db not_null type("VARCHAR(32)")
-        std::string _category_name; //分类名称
-        #pragma db type("TEXT")
-        odb::nullable<std::string> _category_description; //分类描述
-    };
-
     //视频标签映射表
-    #pragma db object table("tbl_video_tag_meta")
+    #pragma db object table("tbl_tag_meta")
+    class suiTagMeta
+    {
+    public:
+        using ptr = std::shared_ptr<suiTagMeta>;
+
+        suiTagMeta();
+        void setTagDescription(const std::string& description);
+        void setTagId(long long tag_id);
+
+        long long getTagId();
+        const std::string& getTagDescription();
+    private:
+        friend class ::odb::access;
+        #pragma db id auto type("BIGINT") 
+        long long  _tag_id; //自增标签id主键
+        #pragma db not_null type("VARCHAR(32)")
+        std::string _tag_description; //标签描述
+
+        //创建索引
+        #pragma db index("description_idx") member(_tag_description)
+        //主键固定存在主索引
+    };
+
+    //视频分类映射表
+    #pragma db object table("tbl_video_category_meta")
     class suiVideoTagMeta
     {
     public:
@@ -676,50 +701,71 @@ namespace suiDataSql{
         suiVideoTagMeta();
 
         void setVideoId(const std::string& video_id);
-        void setTagId(const std::string& tag_id);
+        void setTagId(long long tag_id);
 
         const std::string& getVideoId();
-        const std::string& getTagId();
+        long long getTagId();
     private:
         friend class ::odb::access;
         #pragma db id auto 
         unsigned long long  _primaryKey; //主键
         #pragma db not_null type("VARCHAR(128)")
         std::string _video_id; //视频id
-        #pragma db not_null type("VARCHAR(128)")
-        std::string _tag_id; //标签id
+        #pragma db not_null type("BIGINT")
+        long long _tag_id; //分类id
 
         //创建索引
         #pragma db index("video_id_idx") member(_video_id)
-        #pragma db index("tag_id_idx") member(_tag_id)
+        //复合索引去重操作,并以标签id为第一索引字段，视频id为第二索引字段
+        #pragma db index("tag_id_idx") unique member(_tag_id) member(_video_id)
     };
 
-    //视频分类映射表
-    #pragma db object table("tbl_video_category_meta")
-    class suiVideoCategoryMeta
+    //标签表与视频分类映射表视图
+    #pragma db view object(suiTagMeta) \
+            object(suiVideoTagMeta: suiVideoTagMeta::_tag_id == suiTagMeta::_tag_id)\
+            query((?))
+    struct videoTagView
     {
-    public:
-        using ptr = std::shared_ptr<suiVideoCategoryMeta>;
+        using ptr = std::shared_ptr<videoTagView>;
+        //标签基础信息
+        suiVideoTagMeta::ptr videoMeta;
+    };
 
-        suiVideoCategoryMeta();
+    #pragma db view object(suiTagMeta) \
+            object(suiVideoTagMeta: suiVideoTagMeta::_tag_id == suiTagMeta::_tag_id)\
+            query((?))
+    struct tagVideoView
+    {
+        using ptr = std::shared_ptr<tagVideoView>;
+        //标签基础信息
+        suiTagMeta::ptr tags;
+    };
 
-        void setVideoId(const std::string& video_id);
-        void setCategoryId(const std::string& category_id);
+    //获取总数
+    #pragma db view object(suiTagMeta) \
+            object(suiVideoTagMeta: suiVideoTagMeta::_tag_id == suiTagMeta::_tag_id)\
+            query((?))
+    struct videoTagTotal
+    {
+        using ptr = std::shared_ptr<videoTagTotal>;
+        #pragma db column("COUNT(*)")
+        int total;
+    };
 
-        const std::string& getVideoId();
-        const std::string& getCategoryId();
-    private:
-        friend class ::odb::access;
-        #pragma db id auto 
-        unsigned long long  _primaryKey; //主键
-        #pragma db not_null type("VARCHAR(128)")
-        std::string _video_id; //视频id
-        #pragma db not_null type("VARCHAR(128)")
-        std::string _category_id; //分类id
+    struct suiVideoListByTag
+    {
+        using ptr = std::shared_ptr<suiVideoListByTag>;
+        //视频分类列表
+        std::vector<suiVideoTagMeta> list;
+        //总数
+        int total = 0;
+    };
 
-        //创建索引
-        #pragma db index("video_id_idx") member(_video_id)
-        #pragma db index("category_id_idx") member(_category_id)
+    struct suiGetTagsByVideoRsp
+    {
+        using ptr = std::shared_ptr<suiGetTagsByVideoRsp>;
+        //标签列表
+        std::vector<suiTagMeta> list;
     };
 
     //视频弹幕信息表
@@ -732,11 +778,18 @@ namespace suiDataSql{
 
         void setVideoId(const std::string& video_id);
         void setUserId(const std::string& user_id);
+        void setBulletchatId(const std::string& bulletchat_id);
         void setBulletchat(const std::string& bulletchat);
+        void setSendByVideoTime(std::uint64_t send_by_video_time);
+        void setCreateTime(std::uint64_t create_time);
+        void setCreateTime();
 
-        std::string& getVideoId();
-        std::string& getUserId();
-        std::string& getBulletchat();
+        const std::string& getVideoId();
+        const std::string& getUserId();
+        const std::string& getBulletchatId();
+        const std::string& getBulletchat();
+        std::uint64_t getSendByVideoTime();
+        std::uint64_t getCreateTime();
     private:
         friend class ::odb::access;
         #pragma db id auto 
@@ -750,7 +803,22 @@ namespace suiDataSql{
         #pragma db type("TEXT")
         std::string _bulletchat; //弹幕内容
         #pragma db type("BIGINT UNSIGNED NOT NULL DEFAULT 0")
+        std::uint64_t _send_by_video_time; //发送的时间
+        #pragma db type("BIGINT UNSIGNED NOT NULL DEFAULT 0")
         std::uint64_t _create_time; //创建时间
+
+        //创建索引
+        //根据视频id查询 再就是 偏移时间查询
+        #pragma db index("video_id_idx") member(_video_id) member(_send_by_video_time)
+        //根据用户id查询
+        #pragma db index("user_id_idx") member(_user_id)
+    };
+
+    //
+    struct videoBulletChatList
+    {
+        using ptr = std::shared_ptr<videoBulletChatList>;
+        std::vector<suiVideoSubtitleTarget> list;
     };
 
 

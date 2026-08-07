@@ -35,10 +35,7 @@ namespace suiSession
             return;
         }
         //更新用户id
-        if(!session.getUserId().null())
-        {
-            session2->setUserId(session.getUserId());
-        }
+        session2->setUserId(session.getUserId());
         //更新会话
         session2->setSessionId(session.getSessionId());
         _db.update(*session2);
@@ -87,8 +84,7 @@ namespace suiSession
     //删除redis会话
     void sessionData::removeBySessionIdToRedis(std::string sessionId)
     {
-        std::string key = getCacheKey(sessionId);
-        publishDeleteMessage({key});
+        publishDeleteMessage({getCacheKey(sessionId)});
     }
     //根据会话ID查询会话
     suiDataSql::suiSessionMeta::ptr sessionData::selectToRedis(const std::string& sessionId)
@@ -129,13 +125,13 @@ namespace suiSession
     void sessionData::update(suiDataSql::suiSessionMeta& session)
     {
         updateToDb(session);
-        publishDeleteMessage({session.getSessionId()});
+        publishDeleteMessage({getCacheKey(session.getSessionId())});
     }
     //删除会话
     void sessionData::removeBySessionId(std::string sessionId)
     {
         removeBysessionIdToDb(sessionId);
-        publishDeleteMessage({sessionId});
+        publishDeleteMessage({getCacheKey(sessionId)});
     }
     std::shared_ptr<std::vector<suiDataSql::suiSessionMeta::ptr>> sessionData::getDataListByUserId(std::string userId)
     {
@@ -160,7 +156,7 @@ namespace suiSession
         for(std::shared_ptr<suiDataSql::suiSessionMeta> it : (*dataList))
         {
             DEBUG("删除用户： {} 会话： {}", userId, it->getSessionId());
-            sessionIdList.push_back(it->getSessionId());
+            sessionIdList.push_back(getCacheKey(it->getSessionId()));
         }
         //发布删除消息
         publishDeleteMessage(sessionIdList);

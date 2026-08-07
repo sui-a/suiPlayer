@@ -84,6 +84,29 @@ namespace suiErrorCodeDef
     
     //==========================================================================
 
+    //==========================================================================
+    //[40000 - 49999] 用户服务错误
+    constexpr int32_t ERR_USER_SERVICE_SESSION_INVALID = 41000; //会话失效
+    constexpr int32_t ERR_USER_SERVICE_SESSION_GUEST = 41001; //临时会话验证失败
+    constexpr int32_t ERR_USER_SERVICE_VERIFY_CODE_MISMATCH = 41002; //验证码申请失败
+    constexpr int32_t ERR_USER_SERVICE_VERIFY_CODE_GET_FAILED = 41003; //验证码获取失败
+    constexpr int32_t ERR_USER_SERVICE_EMAIL_INVALID = 41004; //邮箱格式错误
+    constexpr int32_t ERR_USER_SERVICE_SESSION_ID_INVALID = 41005; //会话格式错误
+    constexpr int32_t ERR_USER_SERVICE_EMAIL_LOGIN_FAILED = 41006; //邮箱登录失败
+    constexpr int32_t ERR_USER_SERVICE_SET_AVATAR_FAILED = 41007; //用户身份验证失败
+    constexpr int32_t ERR_USER_SERVICE_GET_USER_INFO_FAILED = 41008; //获取用户信息失败
+    constexpr int32_t ERR_USER_SERVICE_USER_NOT_FOUND = 41010; //用户不存在
+    constexpr int32_t ERR_USER_SERVICE_USER_PERMISSION_INVALID = 41011; //用户权限不足
+    constexpr int32_t ERR_USER_SERVICE_SESSION_STATUS_INVALID = 41012; //用户会话状态异常
+    constexpr int32_t ERR_USER_SERVICE_VERIFY_CODE_INVALID = 41013; //验证码错误
+    constexpr int32_t ERR_USER_SERVICE_USER_ADMIN_FAILED = 41014; //新增管理员失败
+    constexpr int32_t ERR_USER_SERVICE_USER_ADMIN_REMOVE_FAILED = 41015; //删除管理员失败
+    constexpr int32_t ERR_USER_SERVICE_USER_ADMIN_SET_FAILED = 41016; //修改管理员失败
+    constexpr int32_t ERR_USER_SERVICE_USER_ADMIN_PERMISSION_INVALID = 41017; //用户权限异常
+    constexpr int32_t ERR_USER_SERVICE_USER_ADMIN_INVALID = 41018; //申请参数错误
+    constexpr int32_t ERR_USER_SERVICE_USER_SALT_SET = 41019; //用户信息设置失败
+    constexpr int32_t ERR_USER_SERVICE_EMAIL_DISABLE = 41020; //用户已被禁用
+    //==========================================================================
 
 
 }

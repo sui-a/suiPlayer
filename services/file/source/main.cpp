@@ -5,15 +5,15 @@
 #include "suiIp.hpp"
 
 //注册中心地址
-DEFINE_string(file_server_registry_center, "127.0.0.1:8084", "file_server注册中心地址");
+DEFINE_string(etcd_registry_center, "127.0.0.1:8084", "file_server注册中心地址");
 //rpc监听端口
 DEFINE_int32(file_server_listen_port, 9001, "服务监听端口");
 
 //设置fdfs配置
-DEFINE_string(file_server_fdfs_addr, "127.0.0.1:22122", "fdfs地址");
+DEFINE_string(fdfs_addr, "127.0.0.1:22122", "fdfs地址");
 
 //消息队列
-DEFINE_string(file_server_amqp_addr, "amqp://sui:suisuipingan@localhost:8082//", "amqp地址");
+DEFINE_string(amqp_addr, "amqp://sui:suisuipingan@localhost:8082//", "amqp地址");
 
 //mysql配置
 DEFINE_int32(mysql_server_listen_port, 24411, "mysql服务监听端口");
@@ -29,10 +29,10 @@ DEFINE_string(redis_server_password, "suisuipingan", "redis密码");
 DEFINE_string(redis_server_user, "default", "redis用户名");
 
 //设置文件删除队列的mq设置
-DEFINE_string(file_server_remove_exchange, "file_remove_exchange", "文件删除交换机名称");
-DEFINE_string(file_server_remove_exchange_type, "direct", "文件删除队列交换机类型");
-DEFINE_string(file_server_remove_queue, "file_remove_queue", "文件删除队列名称");
-DEFINE_string(file_server_remove_bind_key, "file_remove_key", "文件删除队列绑定键");
+DEFINE_string(remove_exchange, "file_remove_exchange", "文件删除交换机名称");
+DEFINE_string(remove_exchange_type, "direct", "文件删除队列交换机类型");
+DEFINE_string(remove_queue, "file_remove_queue", "文件删除队列名称");
+DEFINE_string(remove_bind_key, "file_remove_key", "文件删除队列绑定键");
 
 
 int main(int argc, char* argv[])
@@ -51,7 +51,7 @@ int main(int argc, char* argv[])
 
         //设置etcd
         suiFileService::registrySettings registrySet;
-        registrySet.registry_center = FLAGS_file_server_registry_center;
+        registrySet.registry_center = FLAGS_etcd_registry_center;
         registrySet.service_name = "file_server";
         registrySet.service_addr = suiIp::suiIper::GetLocalIP().value() + ":" + std::to_string(FLAGS_file_server_listen_port);
         //传入etcd
@@ -59,7 +59,7 @@ int main(int argc, char* argv[])
 
         //fdfs设置
         suifd::FastdfsSetting fdset;
-        fdset.Addr = FLAGS_file_server_fdfs_addr;
+        fdset.Addr = FLAGS_fdfs_addr;
         //传入fdfs
         build.setFastdfsSetting(fdset);
         
@@ -83,14 +83,14 @@ int main(int argc, char* argv[])
         build.setRedisSetting(redisset);
 
         //设置mq路径
-        build.setQueueUrl(FLAGS_file_server_amqp_addr);
+        build.setQueueUrl(FLAGS_amqp_addr);
 
         //设置文件删除队列的mq设置
         suiQueue::queueSetting removeQueueSetting;
-        removeQueueSetting.exchange = FLAGS_file_server_remove_exchange;
-        removeQueueSetting.exchangeType = FLAGS_file_server_remove_exchange_type;
-        removeQueueSetting.queue = FLAGS_file_server_remove_queue;
-        removeQueueSetting.bindKey = FLAGS_file_server_remove_bind_key;
+        removeQueueSetting.exchange = FLAGS_remove_exchange;
+        removeQueueSetting.exchangeType = FLAGS_remove_exchange_type;
+        removeQueueSetting.queue = FLAGS_remove_queue;
+        removeQueueSetting.bindKey = FLAGS_remove_bind_key;
         //传入文件删除队列的mq设置
         build.setRemoveQueueSetting(removeQueueSetting);
 
@@ -101,7 +101,7 @@ int main(int argc, char* argv[])
             ERROR("文件服务创建失败");
             return -1;
         }
-        INFO("文件服务创建成功");
+        INFO("服务文件启动成功");
         fileServerPtr->start();
     }
     

@@ -74,6 +74,8 @@ file(GLOB_RECURSE MY_GEN_ODB_CPP
     "${CMAKE_CURRENT_BINARY_DIR}/src/*.cxx"
     "${CMAKE_CURRENT_BINARY_DIR}/src/*.cc"
     "${CMAKE_CURRENT_BINARY_DIR}/src/*.hxx"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../../../util/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../../../util/*.hpp"
 )
 
 add_executable(${PROJECT_NAME} ${CUR_SOURCES} ${MY_GEN_ODB_CPP} ${GOAL_FILES})
@@ -92,7 +94,7 @@ set(libs jsoncpp protobuf spdlog
 )
 
 #添加头文件目录
-target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/../../../data)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/../../../data ${CMAKE_CURRENT_SOURCE_DIR}/../../../util)
 target_link_libraries(${PROJECT_NAME}
   PRIVATE
   suiScaffold::suiScaffold

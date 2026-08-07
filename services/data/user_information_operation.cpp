@@ -83,6 +83,17 @@ namespace suiUserInformation
         return true;
     }
 
+    bool suiUserInformationOperation::authenticationByPasswordByEmail(const std::string& email, const std::string& password)
+    {
+        auto ret = getUserInfoByEmailToDb(email);
+        if(ret == nullptr)
+            return false;
+        if(ret->getPassword().null() || ret->getPassword().get() != password)
+            return false;
+        insertToCache(ret); 
+        return true;
+    }
+
     suiDataSql::suiUsrMeta::ptr suiUserInformationOperation::getUserInfoById(const std::string& user_id)
     {
         //直接从数据库查询
@@ -95,14 +106,35 @@ namespace suiUserInformation
         return ret;
     }
 
+    suiDataSql::suiUsrMeta::ptr suiUserInformationOperation::getUserInfoByEmail(const std::string& email)
+    {
+        auto ret = getUserInfoByEmailToDb(email);
+        if(ret)
+        {
+            //缓存
+            insertToCache(ret);
+        }
+        return ret;
+    }
+
     suiDataSql::userInfoList::ptr suiUserInformationOperation::getUserInfoListByTypeAndStatus(suiDataSql::userStatus status, suiDataSql::identityType type, int page, int pageSize)
     {
         return getUserInfoListByTypeAndStatusToDb(status, type, page, pageSize);
     }
 
+    suiDataSql::userInfoList::ptr suiUserInformationOperation::getUserInfoListByUsername(const std::string& username)
+    {
+        return getUserInfoListByNameToDb(username);
+    }
+
     suiDataSql::userInfoList::ptr suiUserInformationOperation::getUserInfoListByTypeAndStatus(suiDataSql::roleType role, suiDataSql::identityType type, int page, int pageSize)
     {
         return getUserInfoListByTypeAndStatusToDb(role, type, page, pageSize);  
+    }
+
+    suiDataSql::userInfoList::ptr suiUserInformationOperation::getUserInfoListByTypeAndStatus(suiDataSql::roleType role, suiDataSql::userStatus status, suiDataSql::identityType type, int page, int pageSize)
+    {
+        return getUserInfoListByTypeAndStatusToDb(role, status, type, page, pageSize);  
     }
 
     std::string suiUserInformationOperation::setAvatar(const std::string& user_id, const std::string& avatar_id)
@@ -160,12 +192,12 @@ namespace suiUserInformation
         return false;
     }
 
-    void suiUserInformationOperation::setAdminInfo(const std::string& user_id, const std::string& admin_name, const std::string& Remark, suiDataSql::userStatus status)
+    void suiUserInformationOperation::setAdminInfo(const std::string& user_id, const std::string& admin_name, const std::string& Remark)
     {
         //删除缓存
         deleteUserToCache(user_id);
         //设置管理员信息
-        setAdminInfoToDb(user_id, admin_name, Remark, status);
+        setAdminInfoToDb(user_id, admin_name, Remark);
     }
 
     void suiUserInformationOperation::deleteUser(const std::string& user_id)
@@ -230,12 +262,17 @@ namespace suiUserInformation
         //创建返回对象
         suiDataSql::userInfoList::ptr out = std::make_shared<suiDataSql::userInfoList>();
         //以视图方式向数据库中获取信息
-       auto ret = handle.query<suiDataSql::suiUsrMeta>(
+        auto ret = handle.query<suiDataSql::suiUsrMeta>(
             odb::query<suiDataSql::suiUsrMeta>::user_name == user_name
+        );
+        //获取总数
+        auto total = handle.query_one<suiDataSql::userInfoTotalView>(
+            odb::query<suiDataSql::userInfoTotalView>::suiUsrMeta::user_name == user_name
         );
         //循环获取
         for(auto& item : ret)
             out->list.push_back(item);
+        out->total = total->total;
         return out;
     }
 
@@ -249,9 +286,14 @@ namespace suiUserInformation
         auto ret = handle.query<suiDataSql::suiUsrMeta>(
             odb::query<suiDataSql::suiUsrMeta>::administrator_name == user_name
         );
+        //获取总数
+        auto total = handle.query_one<suiDataSql::userInfoTotalView>(
+            odb::query<suiDataSql::userInfoTotalView>::suiUsrMeta::administrator_name == user_name
+        );
         //循环获取
         for(auto& item : ret)
             out->list.push_back(item);
+        out->total = total->total;
         return out;
     }
 
@@ -270,13 +312,16 @@ namespace suiUserInformation
         auto q = odb::query<suiDataSql::suiUserIdIdentityRoleView>::suiUserIdIdentityRoleMeta::identity_type == type
         && odb::query<suiDataSql::suiUserIdIdentityRoleView>::suiUserIdIdentityRoleMeta::role_type == role
         && odb::query<suiDataSql::suiUserIdIdentityRoleView>::suiUsrMeta::user_status == status;
-        q += suiDataSql::SqlPaginationUtil::buildPageClause(pageSize, page) + suiDataSql::SqlPaginationUtil::buildOrderByClause("primaryKey");  //定义输出顺序以及内容
+        q += " " + suiDataSql::SqlPaginationUtil::buildPageClause(pageSize, page);  //定义输出顺序以及内容
 
         //开始查询
         auto ret = handle.query<suiDataSql::suiUserIdIdentityRoleView>(q);
+        //获取总数
+        auto total = handle.query_one<suiDataSql::userInfoTotalView>(q);
         //循环获取
         for(auto& itemPtr : ret)
             out->list.push_back(*itemPtr.usrMeta);
+        out->total = total->total;
         return out;
     }
 
@@ -289,15 +334,43 @@ namespace suiUserInformation
 
         auto q = odb::query<suiDataSql::suiUserIdIdentityRoleView>::suiUserIdIdentityRoleMeta::identity_type == type
         && odb::query<suiDataSql::suiUserIdIdentityRoleView>::suiUsrMeta::user_status == status;
-        q += suiDataSql::SqlPaginationUtil::buildPageClause(pageSize, page) + suiDataSql::SqlPaginationUtil::buildOrderByClause("primaryKey");  //定义输出顺序以及内容
+        q += " " + suiDataSql::SqlPaginationUtil::buildPageClause(pageSize, page);  //定义输出顺序以及内容
 
         //开始查询
         auto ret = handle.query<suiDataSql::suiUserIdIdentityRoleView>(q);
+        //获取总数
+        auto total = handle.query_one<suiDataSql::userInfoTotalView>(q);
+
         //循环获取
         for(auto& itemPtr : ret)
             out->list.push_back(*itemPtr.usrMeta);
+        out->total = total->total;
         return out;
     }
+
+    suiDataSql::userInfoList::ptr suiUserInformationOperation::getUserInfoListByTypeAndStatusToDb(suiDataSql::roleType role, suiDataSql::userStatus status, suiDataSql::identityType type, int page, int pageSize)
+    {
+        //通过事务获取连接操作句柄
+        auto& handle = _sql_tx.database();
+        //创建返回对象
+        suiDataSql::userInfoList::ptr out = std::make_shared<suiDataSql::userInfoList>();
+
+        auto q = odb::query<suiDataSql::suiUserIdIdentityRoleView>::suiUserIdIdentityRoleMeta::identity_type == type
+        && odb::query<suiDataSql::suiUserIdIdentityRoleView>::suiUsrMeta::user_status == status
+        && odb::query<suiDataSql::suiUserIdIdentityRoleView>::suiUserIdIdentityRoleMeta::role_type == role;
+        q += " " + suiDataSql::SqlPaginationUtil::buildPageClause(pageSize, page);  //定义输出顺序以及内容
+        //INFO("sql语句是： {}", q.clause());
+        //开始查询
+        auto ret = handle.query<suiDataSql::suiUserIdIdentityRoleView>(q);
+        //获取总数
+        auto total = handle.query_one<suiDataSql::userInfoTotalView>(q);
+        //循环获取
+        for(auto& itemPtr : ret)
+            out->list.push_back(*itemPtr.usrMeta);
+        out->total = total->total;
+        return out;
+    }
+
     suiDataSql::userInfoList::ptr suiUserInformationOperation::getUserInfoListByTypeAndStatusToDb(suiDataSql::roleType role, suiDataSql::identityType type, int page, int pageSize)
     {
         //通过事务获取连接操作句柄
@@ -307,15 +380,17 @@ namespace suiUserInformation
 
         auto q = odb::query<suiDataSql::suiUserIdIdentityRoleView>::suiUserIdIdentityRoleMeta::identity_type == type
         && odb::query<suiDataSql::suiUserIdIdentityRoleView>::suiUserIdIdentityRoleMeta::role_type == role;
-        q += " " + suiDataSql::SqlPaginationUtil::buildOrderByClause("primaryKey") + " " + suiDataSql::SqlPaginationUtil::buildPageClause(pageSize, page);  //定义输出顺序以及内容
+        q +=  " " + suiDataSql::SqlPaginationUtil::buildPageClause(pageSize, page);  //定义输出顺序以及内容
         std::stringstream ss;
         ss << q.clause();
-        INFO("查询语句: {}", ss.str());
         //开始查询
         auto ret = handle.query<suiDataSql::suiUserIdIdentityRoleView>(q);
+        //获取总数
+        auto total = handle.query_one<suiDataSql::userInfoTotalView>(q);
         //循环获取
         for(auto& itemPtr : ret)
             out->list.push_back(*itemPtr.usrMeta);
+        out->total = total->total;
         return out;
     }
 
@@ -423,7 +498,7 @@ namespace suiUserInformation
         handle.update(*ret);
     }
 
-    void suiUserInformationOperation::setAdminInfoToDb(const std::string& user_id, const std::string& admin_name, const std::string& Remark, suiDataSql::userStatus status)
+    void suiUserInformationOperation::setAdminInfoToDb(const std::string& user_id, const std::string& admin_name, const std::string& Remark)
     {
         //通过事务获取连接操作句柄
         auto& handle = _sql_tx.database();
@@ -436,8 +511,6 @@ namespace suiUserInformation
         //开始修改值
         ret->setAdministratorName(admin_name);
         ret->setUserDescription(Remark);
-        ret->setUserStatus(status);
-
         handle.update(*ret);
     }
 

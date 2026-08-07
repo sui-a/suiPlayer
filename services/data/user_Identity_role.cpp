@@ -50,6 +50,23 @@ namespace suiUserIdentityRole
         return ret;
     }
 
+    void UserIdentityRole::update(suiDataSql::suiUserIdIdentityRoleMeta::ptr updateData)
+    {
+        //先查找
+        auto ret = selectToDb(updateData->getUserId());
+        if(ret)
+        {
+            //存在目标
+            ret->setUserId(updateData->getUserId());
+            ret->setRoleType(updateData->getRoleType());
+            ret->setIdentityType(updateData->getIdentityType());
+            //更新数据库
+            _db.update(*ret);
+            //删除缓存
+            publishDeleteMessage({getCacheKey(ret->getUserId())});
+        }
+    }
+
     //判断
     //判断是否拥有某个身份
     bool UserIdentityRole::hasIdentity(const std::string& user_id, suiDataSql::identityType identity_type)
@@ -66,6 +83,18 @@ namespace suiUserIdentityRole
         auto ret = select(user_id);
         if(ret)
             return ret->getRoleType() == role_type;
+        return false;
+    }
+
+    bool UserIdentityRole::hasPermission(const std::string& user_id, suiDataSql::identityType identity_type, suiDataSql::roleType role_type)
+    {
+        //先查找
+        auto ret = select(user_id);
+        if(suiDataSql::suiRoleType::comparePermission(ret->getRoleType(), role_type) 
+        && suiDataSql::suiIdentityType::comparePermission(ret->getIdentityType(), identity_type))
+        {
+            return true;
+        }
         return false;
     }
 

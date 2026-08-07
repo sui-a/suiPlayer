@@ -24,15 +24,16 @@ namespace suiUserIdentityRole
         //查
         suiDataSql::suiUserIdIdentityRoleMeta::ptr select(const std::string& user_id);
 
-        //改  不需要更新接口， 由于一个用户可能存在多个身份，不能直接根据某个字段来判断更新什么，所以更新操作用删增完成
-        //bool update(const std::string& user_id, suiDataSql::roleType role_type, suiDataSql::identityType identity_type);
-        //bool update(suiDataSql::suiUserIdIdentityRoleMeta::ptr updateData);
+        //更新接口
+        void update(suiDataSql::suiUserIdIdentityRoleMeta::ptr updateData);
 
         //判断
         //判断是否拥有某个身份
         bool hasIdentity(const std::string& user_id, suiDataSql::identityType identity_type);
         //判断是否拥有某个角色
         bool hasRole(const std::string& user_id, suiDataSql::roleType role_type);
+        //判断用户是否有大于某个身份的权限
+        bool hasPermission(const std::string& user_id, suiDataSql::identityType identity_type, suiDataSql::roleType role_type);
 
     private:
         //数据库操作

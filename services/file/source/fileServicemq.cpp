@@ -9,7 +9,6 @@ namespace suiFileService
         _subscriber = std::make_shared<suiQueue::suiSubscriber>(mq, queueSetting);
         //开始绑定处理
         _subscriber->consume(std::bind(&suiFileService::fileRemoveMq::callback, this, std::placeholders::_1));
-
         //fdfs服务全局都可能用，放在类外初始化
     }
 
@@ -24,7 +23,6 @@ namespace suiFileService
             return true;  //反序列化失败，但返回true 目的是不中断消息队列的消费 无效消息丢弃即可
         }
         int sz = msg.fileid_size();
-        INFO("收到删除文件消息，共{}个file", sz);
         //开始删除元数据
         for(int i = 0; i < sz; i++) 
         {

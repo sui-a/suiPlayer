@@ -58,17 +58,17 @@ message UserInfo {
   optional string userId = 1; //用户ID
   optional string email = 2; //绑定邮箱
   optional string nickname = 3; //名称
-  repeated roleType role = 4; //角色类型
-  repeated identityType identify = 5; //身份类型
+  optional roleType role = 4; //角色类型
+  optional identityType identify = 5; //身份类型
   optional int32 likeCount = 6; //点赞数量
   optional int32 playCount = 7; //播放数量
-  optional int32 followedCount = 8; //关注数量
-  optional int32 followerCount = 9; //关注者数量
+  optional int32 followCount = 8; //关注数量
+  optional int32 funsCount = 9; //粉丝数量
   optional userStatus status = 10; //用户状态
   optional followStatus isFollowing = 11; //是否关注
   optional string userMemo = 12; //备注信息
   optional string userCTime = 13; //创建时间
-  optional string avatarFileId = 14; //头像文件
+  optional string avatarFileId = 14; //头像文件ID
 }
 
 //管理员信息
@@ -76,9 +76,10 @@ message AdminInfo {
   optional string userId = 1; //用户ID
   optional string nickname = 2; //名称
   optional roleType role = 3; //角色类型
-  optional userStatus status = 4; //用户状态
-  optional string userMemo = 5; //备注信息
-  optional string email = 6; //绑定邮箱
+  optional identityType identify = 4;
+  optional userStatus status = 5; //用户状态
+  optional string userMemo = 6; //备注信息
+  optional string email = 7; //绑定邮箱
 }
 
 //文件信息

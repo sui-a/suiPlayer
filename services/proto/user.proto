@@ -6,8 +6,8 @@ import "base.proto";
 option cc_generic_services = true;
 
 //接口定义
-
 //临时登录
+message httpTempLoginReq {}
 message tempLoginReq {
   optional string id = 1;
 }
@@ -25,14 +25,17 @@ message tempLoginRsp {
 }
 
 //会话登录/创建请求
+message httpSessionLoginReq {}
 message sessionLoginReq {
-  optional string requestId = 1; //请求id
+  optional string id = 1; //请求id
   optional string sessionId = 2; //会话id
+  optional string userId = 3; //用户id 不填写则默认临时会话
 }
 
 //会话登录响应
 message sessionLoginResult {
   optional bool isGuest = 1; //是否是临时用户
+  optional string userId = 2; //如果不是临时用户，直接返回用户id
 }
 
 message sessionLoginRsp {
@@ -43,6 +46,7 @@ message sessionLoginRsp {
 }
 
 //验证码服务
+message httpGetEmailCodeReq {}
 message getEmailCodeReq {
   optional string id = 1;
   optional string sessionid = 2;
@@ -50,67 +54,80 @@ message getEmailCodeReq {
 }
 
 message getEmailCodeResult {
-  optional string codeId = 1; //验证码id
+  optional string codeId = 1;
 }
 
 message getEmailCodeRsp {
   optional string id = 1;
   optional int32 errorCode = 2;
   optional string errorMsg = 3;
-  getEmailCodeResult result = 4;
+  optional getEmailCodeResult result = 4;
 }
 
-//短信登录
+//邮箱验证码登录
+message httpEmailNumberLoginReq {}
 message emailNumberLoginReq {
   optional string id = 1;
-  optional int32 errorCode = 2;
-  optional string errorMsg = 3;
-  optional string emailNumber = 4;
-  optional string verifyCode = 5;
-  optional string emailNumberId = 6;
+  optional string sessionid = 2;
+  optional string codeId = 3;
+  optional string verifyCode = 4;
+  optional string emailNumber = 5;
+}
+
+//返回用户id
+message emailNumberLoginResult {
+  optional string userId = 1;
 }
 
 message emailNumberLoginRsp {
   optional string id = 1;
   optional int32 errorCode = 2;
   optional string errorMsg = 3;
+  optional emailNumberLoginResult result = 4;
 }
 
-//密码登录
+//邮箱密码登录
+message httpPasswordLoginReq {}
 message passwordLoginReq {
   optional string id = 1;
   optional string sessionId = 2;
-  optional string userName = 3;
+  optional string emailNumber = 3;
   optional string password = 4;
+}
+
+//响应
+message passwordLoginResult {
+  optional string userId = 1;
 }
 
 message passwordLoginRsp {
   optional string id = 1;
   optional int32 errorCode = 2;
   optional string errorMsg = 3;
+  passwordLoginResult result = 4;
 }
 
 //退出登录
+message httpLogoutReq {}
 message logoutReq {
   optional string id = 1;
   optional string sessionId = 2;
+  optional string userId = 3;
 }
 
-message logoutResult {
-  optional string sessionId = 1;
-}
 message logoutRsp {
   optional string id = 1;
   optional int32 errorCode = 2;
   optional string errorMsg = 3;
-  logoutResult result = 4;
 }
 
 //设置用户头像
+message httpSetUserAvatarReq {}
 message setUserAvatarReq {
   optional string id = 1;
   optional string sessionId = 2;
-  optional string fileId = 3;
+  optional string userId = 3;
+  optional string fileId = 4;
 }
 
 message setUserAvatarRsp {
@@ -120,10 +137,12 @@ message setUserAvatarRsp {
 }
 
 //设置用户名称
+message httpSetUserNicknameReq {}
 message setUserNicknameReq {
   optional string id = 1;
   optional string sessionId = 2;
   optional string nickname = 3;
+  optional string userId = 4;
 }
 
 message setUserNicknameRsp {
@@ -133,10 +152,12 @@ message setUserNicknameRsp {
 }
 
 //设置登录密码
+message httpSetPasswordReq {}
 message setPasswordReq {
   optional string id = 1;
   optional string sessionId = 2;
   optional string password = 3;
+  optional string userId = 4;
 }
 
 message setPasswordRsp {
@@ -146,11 +167,13 @@ message setPasswordRsp {
 }
 
 //设置⽤⼾状态
+message httpSetUserStatusReq {}
 message setUserStatusReq {
   optional string id = 1;
   optional string sessionId = 2;
   optional string userId = 3;
-  optional int32 userStatus = 4;
+  optional string targetUserId = 4;
+  optional userStatus userStatus = 5;
 }
 
 message setUserStatusRsp {
@@ -159,11 +182,13 @@ message setUserStatusRsp {
   optional string errorMsg = 3;
 }
 
-//获取某用户信息
+//获取某用户信息 获取用户信息不需要核验权限，只需要保证会话正确即可
+message httpUserInfoReq {}
 message userInfoReq {
   optional string id = 1;
   optional string sessionId = 2;
   optional string userId = 3;
+  optional string targetUserId = 4;
 }
 
 message userInfoResult {
@@ -178,10 +203,12 @@ message userInfoRsp {
 }
 
 //新增关注
+message httpNewFollowReq {}
 message newFollowReq {
   optional string id = 1;
   optional string sessionId = 2;
   optional string userId = 3;
+  optional string targetUserId = 4;
 }
 
 message newFollowRsp {
@@ -191,10 +218,12 @@ message newFollowRsp {
 }
 
 //取消关注
+message httpDelFollowReq {}
 message DelFollowReq {
   optional string id = 1;
   optional string sessionId = 2;
   optional string userId = 3;
+  optional string targetUserId = 4;
 }
 message DelFollowRsp {
   optional string id = 1;
@@ -203,11 +232,14 @@ message DelFollowRsp {
 }
 
 //新增管理员
+message httpNewAdminReq {}
 message NewAdminReq {
   optional string id = 1;
   optional string sessionId = 2;
-  AdminInfo userInfo = 3;
+  optional string userId = 3;
+  optional string targetUserId = 4;
 }
+
 message NewAdminRsp {
   optional string id = 1;
   optional int32 errorCode = 2;
@@ -215,11 +247,14 @@ message NewAdminRsp {
 }
 
 //删除管理员
+message httpDelAdminReq {}
 message DelAdminReq {
   optional string id = 1;
   optional string sessionId = 2;
   optional string userId = 3;
+  optional string targetUserId = 4;
 }
+
 message DelAdminRsp {
   optional string id = 1;
   optional int32 errorCode = 2;
@@ -227,11 +262,14 @@ message DelAdminRsp {
 }
 
 //编辑管理员信息
+message httpSetAdminReq {}
 message SetAdminReq {
   optional string id = 1;
   optional string sessionId = 2;
-  optional AdminInfo userInfo = 3;
+  optional string userId = 3;
+  optional AdminInfo userInfo = 4;
 }
+
 message SetAdminRsp {
   optional string id = 1;
   optional int32 errorCode = 2;
@@ -239,6 +277,7 @@ message SetAdminRsp {
 }
 
 //通过邮箱获取管理员信息
+message httpGetAdminReq {}
 message GetAdminReq {
   optional string id = 1;
   optional string sessionId = 2;
@@ -255,22 +294,59 @@ message GetAdminRsp {
 }
 
 //获取管理员列表
+message httpGetAdminListReq {}
 message GetAdminListReq {
   optional string id = 1;
   optional string sessionId = 2;
   optional int32 pageIndex = 3;
   optional int32 pageCount = 4;
-  optional int32 userStatus = 5;
+  optional roleType role = 5;
 }
+
 message GetAdminListResult {
   optional int32 totalCount = 1;
   repeated AdminInfo userList = 2;
 }
+
 message GetAdminListRsp {
   optional string id = 1;
   optional int32 errorCode = 2;
   optional string errorMsg = 3;
   GetAdminListResult result = 4;
+}
+
+//设置加密信息
+message httpSetSaltReq {}
+message SetSaltReq {
+  optional string id = 1;
+  optional string sessionId = 2;
+  optional string userId = 4;
+  optional string salt = 3;
+}
+
+message SetSaltRsp {
+  optional string id = 1;
+  optional int32 errorCode = 2;
+  optional string errorMsg = 3;
+}
+
+//获取加密信息
+message httpGetSaltReq {}
+message GetSaltReq {
+  optional string id = 1;
+  optional string sessionId = 2;
+  optional string userId = 3;
+}
+
+message GetSaltResult {
+  optional string salt = 1;
+}
+
+message GetSaltRsp {
+  optional string id = 1;
+  optional int32 errorCode = 2;
+  optional string errorMsg = 3;
+  GetSaltResult result = 4;
 }
 
 service userServices {
@@ -292,4 +368,6 @@ service userServices {
   rpc SetAdmin(SetAdminReq) returns (SetAdminRsp);
   rpc GetAdmin(GetAdminReq) returns (GetAdminRsp);
   rpc GetAdminList(GetAdminListReq) returns (GetAdminListRsp);
+  rpc SetSalt(SetSaltReq) returns (SetSaltRsp);
+  rpc GetSalt(GetSaltReq) returns (GetSaltRsp);
 }

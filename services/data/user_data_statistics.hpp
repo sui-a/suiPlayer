@@ -4,7 +4,6 @@
 #include <suiScaffold/suiQueue.hpp>
 #include <suiScaffold/log.h>
 #include "removeCache.hpp"
-#include "db_set_async.hpp"
 #include "data.hpp"
 #include "data-odb.hxx"
 

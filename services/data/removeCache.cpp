@@ -26,6 +26,7 @@ namespace suiRemoveCache
         suiApi::DeleteCacheMsg msg;
         for (auto &id : cache_key) {
             _redis->del(id);
+            INFO("删除缓存key: {}", id);
             msg.add_key(id);
         }
         // 2. 发布消息

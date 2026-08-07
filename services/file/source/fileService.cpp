@@ -100,7 +100,7 @@ namespace suiFileService
         _provider->redister();
         //构造返回对象
         suifileServer::ptr retFileServer(new suifileServer(_provider, _server, _filemq));
-        INFO("服务启动成功，服务key为： {}", _provider->getKey());
+        INFO("服务key为： {}", _provider->getKey());
         return retFileServer;
     }
 

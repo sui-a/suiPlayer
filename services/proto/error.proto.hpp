@@ -106,7 +106,20 @@ namespace suiErrorCodeDef
     constexpr int32_t ERR_USER_SERVICE_USER_ADMIN_INVALID = 41018; //申请参数错误
     constexpr int32_t ERR_USER_SERVICE_USER_SALT_SET = 41019; //用户信息设置失败
     constexpr int32_t ERR_USER_SERVICE_EMAIL_DISABLE = 41020; //用户已被禁用
+    constexpr int32_t ERR_USER_SERVICE_PASSWORD_INVALID = 41021; //密码错误
+    constexpr int32_t ERR_USER_IDENTITY_ROLE_INVALID = 41022; //用户属性异常
     //==========================================================================
 
 
+    //==========================================================================
+    //[50000 - 59999] 视频服务错误
+    constexpr int32_t ERR_VIDEO_SERVICE_VIDEO_NOT_FOUND = 51000; //视频不存在
+    constexpr int32_t ERR_VIDEO_SERVICE_UPLOAD_USER_MISMATCH = 51001; //视频上传用户与会话用户不匹配
+    constexpr int32_t ERR_VIDEO_SERVICE_VIDEO_STATUS_INVALID = 51002; //视频状态异常
+
+    //==========================================================================
+    //服务器错误
+    constexpr int32_t ERR_SERVER = 99998; // 服务器内部未知错误
+    //未知错误
+    constexpr int32_t ERR_UNKNOWN = 99999; // 未知错误
 }

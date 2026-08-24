@@ -7,7 +7,6 @@ option cc_generic_services = true;
 
 //接口定义
 //临时登录
-message httpTempLoginReq {}
 message tempLoginReq {
   optional string id = 1;
 }
@@ -25,11 +24,9 @@ message tempLoginRsp {
 }
 
 //会话登录/创建请求
-message httpSessionLoginReq {}
 message sessionLoginReq {
   optional string id = 1; //请求id
   optional string sessionId = 2; //会话id
-  optional string userId = 3; //用户id 不填写则默认临时会话
 }
 
 //会话登录响应
@@ -46,7 +43,6 @@ message sessionLoginRsp {
 }
 
 //验证码服务
-message httpGetEmailCodeReq {}
 message getEmailCodeReq {
   optional string id = 1;
   optional string sessionid = 2;
@@ -65,7 +61,6 @@ message getEmailCodeRsp {
 }
 
 //邮箱验证码登录
-message httpEmailNumberLoginReq {}
 message emailNumberLoginReq {
   optional string id = 1;
   optional string sessionid = 2;
@@ -87,7 +82,6 @@ message emailNumberLoginRsp {
 }
 
 //邮箱密码登录
-message httpPasswordLoginReq {}
 message passwordLoginReq {
   optional string id = 1;
   optional string sessionId = 2;
@@ -108,11 +102,9 @@ message passwordLoginRsp {
 }
 
 //退出登录
-message httpLogoutReq {}
 message logoutReq {
   optional string id = 1;
   optional string sessionId = 2;
-  optional string userId = 3;
 }
 
 message logoutRsp {
@@ -122,12 +114,10 @@ message logoutRsp {
 }
 
 //设置用户头像
-message httpSetUserAvatarReq {}
 message setUserAvatarReq {
   optional string id = 1;
   optional string sessionId = 2;
-  optional string userId = 3;
-  optional string fileId = 4;
+  optional string fileId = 3;
 }
 
 message setUserAvatarRsp {
@@ -137,12 +127,10 @@ message setUserAvatarRsp {
 }
 
 //设置用户名称
-message httpSetUserNicknameReq {}
 message setUserNicknameReq {
   optional string id = 1;
   optional string sessionId = 2;
   optional string nickname = 3;
-  optional string userId = 4;
 }
 
 message setUserNicknameRsp {
@@ -152,12 +140,10 @@ message setUserNicknameRsp {
 }
 
 //设置登录密码
-message httpSetPasswordReq {}
 message setPasswordReq {
   optional string id = 1;
   optional string sessionId = 2;
   optional string password = 3;
-  optional string userId = 4;
 }
 
 message setPasswordRsp {
@@ -167,13 +153,11 @@ message setPasswordRsp {
 }
 
 //设置⽤⼾状态
-message httpSetUserStatusReq {}
 message setUserStatusReq {
   optional string id = 1;
   optional string sessionId = 2;
-  optional string userId = 3;
-  optional string targetUserId = 4;
-  optional userStatus userStatus = 5;
+  optional string targetUserId = 3;
+  optional userStatus userStatus = 4;
 }
 
 message setUserStatusRsp {
@@ -183,12 +167,10 @@ message setUserStatusRsp {
 }
 
 //获取某用户信息 获取用户信息不需要核验权限，只需要保证会话正确即可
-message httpUserInfoReq {}
 message userInfoReq {
   optional string id = 1;
   optional string sessionId = 2;
   optional string userId = 3;
-  optional string targetUserId = 4;
 }
 
 message userInfoResult {
@@ -203,12 +185,10 @@ message userInfoRsp {
 }
 
 //新增关注
-message httpNewFollowReq {}
 message newFollowReq {
   optional string id = 1;
   optional string sessionId = 2;
-  optional string userId = 3;
-  optional string targetUserId = 4;
+  optional string targetUserId = 3;
 }
 
 message newFollowRsp {
@@ -218,12 +198,10 @@ message newFollowRsp {
 }
 
 //取消关注
-message httpDelFollowReq {}
 message DelFollowReq {
   optional string id = 1;
   optional string sessionId = 2;
-  optional string userId = 3;
-  optional string targetUserId = 4;
+  optional string targetUserId = 3;
 }
 message DelFollowRsp {
   optional string id = 1;
@@ -232,12 +210,10 @@ message DelFollowRsp {
 }
 
 //新增管理员
-message httpNewAdminReq {}
 message NewAdminReq {
   optional string id = 1;
   optional string sessionId = 2;
-  optional string userId = 3;
-  optional string targetUserId = 4;
+  optional string targetUserId = 3;
 }
 
 message NewAdminRsp {
@@ -247,12 +223,10 @@ message NewAdminRsp {
 }
 
 //删除管理员
-message httpDelAdminReq {}
 message DelAdminReq {
   optional string id = 1;
   optional string sessionId = 2;
-  optional string userId = 3;
-  optional string targetUserId = 4;
+  optional string targetUserId = 3;
 }
 
 message DelAdminRsp {
@@ -262,12 +236,10 @@ message DelAdminRsp {
 }
 
 //编辑管理员信息
-message httpSetAdminReq {}
 message SetAdminReq {
   optional string id = 1;
   optional string sessionId = 2;
-  optional string userId = 3;
-  optional AdminInfo userInfo = 4;
+  optional AdminInfo userInfo = 3;
 }
 
 message SetAdminRsp {
@@ -277,7 +249,6 @@ message SetAdminRsp {
 }
 
 //通过邮箱获取管理员信息
-message httpGetAdminReq {}
 message GetAdminReq {
   optional string id = 1;
   optional string sessionId = 2;
@@ -294,7 +265,6 @@ message GetAdminRsp {
 }
 
 //获取管理员列表
-message httpGetAdminListReq {}
 message GetAdminListReq {
   optional string id = 1;
   optional string sessionId = 2;
@@ -316,7 +286,6 @@ message GetAdminListRsp {
 }
 
 //设置加密信息
-message httpSetSaltReq {}
 message SetSaltReq {
   optional string id = 1;
   optional string sessionId = 2;
@@ -331,7 +300,6 @@ message SetSaltRsp {
 }
 
 //获取加密信息
-message httpGetSaltReq {}
 message GetSaltReq {
   optional string id = 1;
   optional string sessionId = 2;

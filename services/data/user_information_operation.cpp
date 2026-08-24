@@ -312,12 +312,12 @@ namespace suiUserInformation
         auto q = odb::query<suiDataSql::suiUserIdIdentityRoleView>::suiUserIdIdentityRoleMeta::identity_type == type
         && odb::query<suiDataSql::suiUserIdIdentityRoleView>::suiUserIdIdentityRoleMeta::role_type == role
         && odb::query<suiDataSql::suiUserIdIdentityRoleView>::suiUsrMeta::user_status == status;
-        q += " " + suiDataSql::SqlPaginationUtil::buildPageClause(pageSize, page);  //定义输出顺序以及内容
-
-        //开始查询
-        auto ret = handle.query<suiDataSql::suiUserIdIdentityRoleView>(q);
         //获取总数
         auto total = handle.query_one<suiDataSql::userInfoTotalView>(q);
+        //再添加条件
+        q += " " + suiDataSql::SqlPaginationUtil::buildPageClause(pageSize, page);  //定义输出顺序以及内容
+        //开始查询
+        auto ret = handle.query<suiDataSql::suiUserIdIdentityRoleView>(q);
         //循环获取
         for(auto& itemPtr : ret)
             out->list.push_back(*itemPtr.usrMeta);
@@ -334,13 +334,12 @@ namespace suiUserInformation
 
         auto q = odb::query<suiDataSql::suiUserIdIdentityRoleView>::suiUserIdIdentityRoleMeta::identity_type == type
         && odb::query<suiDataSql::suiUserIdIdentityRoleView>::suiUsrMeta::user_status == status;
-        q += " " + suiDataSql::SqlPaginationUtil::buildPageClause(pageSize, page);  //定义输出顺序以及内容
-
-        //开始查询
-        auto ret = handle.query<suiDataSql::suiUserIdIdentityRoleView>(q);
         //获取总数
         auto total = handle.query_one<suiDataSql::userInfoTotalView>(q);
-
+        //再添加条件
+        q += " " + suiDataSql::SqlPaginationUtil::buildPageClause(pageSize, page);  //定义输出顺序以及内容
+        //开始查询
+        auto ret = handle.query<suiDataSql::suiUserIdIdentityRoleView>(q);
         //循环获取
         for(auto& itemPtr : ret)
             out->list.push_back(*itemPtr.usrMeta);
@@ -358,12 +357,13 @@ namespace suiUserInformation
         auto q = odb::query<suiDataSql::suiUserIdIdentityRoleView>::suiUserIdIdentityRoleMeta::identity_type == type
         && odb::query<suiDataSql::suiUserIdIdentityRoleView>::suiUsrMeta::user_status == status
         && odb::query<suiDataSql::suiUserIdIdentityRoleView>::suiUserIdIdentityRoleMeta::role_type == role;
+        //获取总数
+        auto total = handle.query_one<suiDataSql::userInfoTotalView>(q);
+        //再添加条件
         q += " " + suiDataSql::SqlPaginationUtil::buildPageClause(pageSize, page);  //定义输出顺序以及内容
         //INFO("sql语句是： {}", q.clause());
         //开始查询
         auto ret = handle.query<suiDataSql::suiUserIdIdentityRoleView>(q);
-        //获取总数
-        auto total = handle.query_one<suiDataSql::userInfoTotalView>(q);
         //循环获取
         for(auto& itemPtr : ret)
             out->list.push_back(*itemPtr.usrMeta);
@@ -380,13 +380,12 @@ namespace suiUserInformation
 
         auto q = odb::query<suiDataSql::suiUserIdIdentityRoleView>::suiUserIdIdentityRoleMeta::identity_type == type
         && odb::query<suiDataSql::suiUserIdIdentityRoleView>::suiUserIdIdentityRoleMeta::role_type == role;
-        q +=  " " + suiDataSql::SqlPaginationUtil::buildPageClause(pageSize, page);  //定义输出顺序以及内容
-        std::stringstream ss;
-        ss << q.clause();
-        //开始查询
-        auto ret = handle.query<suiDataSql::suiUserIdIdentityRoleView>(q);
         //获取总数
         auto total = handle.query_one<suiDataSql::userInfoTotalView>(q);
+        //再添加条件
+        q += " " + suiDataSql::SqlPaginationUtil::buildPageClause(pageSize, page);  //定义输出顺序以及内容
+        //开始查询
+        auto ret = handle.query<suiDataSql::suiUserIdIdentityRoleView>(q);
         //循环获取
         for(auto& itemPtr : ret)
             out->list.push_back(*itemPtr.usrMeta);
@@ -420,10 +419,15 @@ namespace suiUserInformation
         if(ret == nullptr)
             return;
         //开始修改值，进行更新 用户id固定不变
+        ret->setUserId(newInfo.getUserId());
+        ret->setBindEmail(newInfo.getBindEmail());
         ret->setUserName(newInfo.getUserName());
         ret->setAdministratorName(newInfo.getAdministratorName());
+        ret->setPassword(newInfo.getPassword());
         ret->setHeadImageFileId(newInfo.getHeadImageFileId());
         ret->setUserDescription(newInfo.getUserDescription());
+        ret->setUserStatus(newInfo.getUserStatus());
+        ret->setUploadTime(newInfo.getUploadTime());
         handle.update(*ret);
     }
 

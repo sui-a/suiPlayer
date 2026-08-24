@@ -12,7 +12,7 @@ namespace suiFileService
         fileRemoveMq(fileMetaService::ptr fileService, suiQueue::MQClient::ptr mq, const suiQueue::queueSetting& queueSetting);
 
     private:
-        bool callback(std::string body);
+        bool callback(std::string msg);
 
     private:
         //文件元信息控制对象

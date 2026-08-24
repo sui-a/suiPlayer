@@ -9,14 +9,14 @@ namespace suiTime
         return std::chrono::duration_cast<std::chrono::seconds>(duration).count();
     }
 
-    long long get_timestamp_ms() 
+    long long suiTimeOperater::get_timestamp_ms() 
     {
         auto now = std::chrono::system_clock::now();
         auto duration = now.time_since_epoch();
         return std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
     }
 
-    std::vector<int> timestamp_sec_to_vec(std::uint64_t timestamp_sec) 
+    std::vector<int> suiTimeOperater::timestamp_sec_to_vec(std::uint64_t timestamp_sec) 
     {
         // 将 uint64_t 转换为 time_t (本质是 time_t，能安全转换)
         std::time_t time_raw = static_cast<std::time_t>(timestamp_sec);
@@ -39,7 +39,7 @@ namespace suiTime
         return {year, month, day, hour, minute, second};
     }
 
-    std::vector<int> timestamp_ms_to_vec(std::uint64_t timestamp_ms) 
+    std::vector<int> suiTimeOperater::timestamp_ms_to_vec(std::uint64_t timestamp_ms) 
     {
         // 算出秒数和剩余的毫秒数
         std::uint64_t sec = timestamp_ms / 1000;

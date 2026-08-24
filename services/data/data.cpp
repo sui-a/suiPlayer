@@ -668,6 +668,78 @@ namespace suiDataSql
     }
     /*用户关注关系表 end ===============================================================================================*/
 
+    namespace videoStatusUtil
+    {
+        std::string toStringFromEnum(videoStatus video_status)
+        {
+            if(video_status == videoStatus::videoStatusUpload)
+                return "videoStatusUpload";
+            else if(video_status == videoStatus::videoStatusTranscoding)
+                return "videoStatusTranscoding";
+            else if(video_status == videoStatus::videoStatusPendingReview)
+                return "videoStatusPendingReview";
+            else if(video_status == videoStatus::videoStatusApproved)
+                return "videoStatusApproved";
+            else if(video_status == videoStatus::videoStatusReject)
+                return "videoStatusReject";
+            else if(video_status == videoStatus::videoStatusRemove)
+                return "videoStatusRemove";
+            else
+                return "videoStatusUnknow";
+
+        }
+        videoStatus getEnumFromString(const std::string& video_status)
+        {
+            //反转
+            if(video_status == "videoStatusUpload")
+                return videoStatus::videoStatusUpload;
+            else if(video_status == "videoStatusTranscoding")
+                return videoStatus::videoStatusTranscoding;
+            else if(video_status == "videoStatusPendingReview")
+                return videoStatus::videoStatusPendingReview;
+            else if(video_status == "videoStatusApproved")
+                return videoStatus::videoStatusApproved;
+            else if(video_status == "videoStatusReject")
+                return videoStatus::videoStatusReject;
+            else if(video_status == "videoStatusRemove")
+                return videoStatus::videoStatusRemove;
+            else
+                return videoStatus::videoStatusUnknow;
+        }
+
+        // 1. 将 enum class 转为 int 数字
+        int getIntFromEnum(videoStatus video_status)
+        {
+            // static_cast 显式转换，安全高效
+            return static_cast<int>(video_status);
+        }
+
+        // 2. 将 int 数字转为 enum class（带安全性校验）
+        videoStatus getEnumFromInt(int video_status)
+        {
+            switch (video_status)
+            {
+                case 1: 
+                    return videoStatus::videoStatusUpload;
+                case 2: 
+                    return videoStatus::videoStatusTranscoding;
+                case 3: 
+                    return videoStatus::videoStatusPendingReview;
+                case 4: 
+                    return videoStatus::videoStatusApproved;
+                case 5: 
+                    return videoStatus::videoStatusReject;
+                case 6: 
+                    return videoStatus::videoStatusRemove;
+                case 0:
+                default:
+                    // 兜底处理：如果传入非法或未知的数字，统一作为未知状态处理，防止枚举越界
+                    return videoStatus::videoStatusUnknow;
+            }
+        }
+
+    }
+
     /*视频元信息表 ===============================================================================================*/
     suiVideoMeta::suiVideoMeta()
     {
@@ -694,7 +766,7 @@ namespace suiDataSql
         _upload_user_id = upload_user_id;
     }
 
-    void suiVideoMeta::setReviewUserId(const std::string& review_user_id)
+    void suiVideoMeta::setReviewUserId(const odb::nullable<std::string>& review_user_id)
     {
         _review_user_id = review_user_id;
     }
@@ -704,7 +776,7 @@ namespace suiDataSql
         _video_name = video_name;
     }
 
-    void suiVideoMeta::setVideoDescription(const std::string& video_description)
+    void suiVideoMeta::setVideoDescription(const odb::nullable<std::string>& video_description)
     {
         _video_description = video_description;
     }
@@ -754,7 +826,7 @@ namespace suiDataSql
         return _upload_user_id;
     }
 
-    const std::string& suiVideoMeta::getReviewUserId()
+    const odb::nullable<std::string>& suiVideoMeta::getReviewUserId()
     {
         return _review_user_id;
     }

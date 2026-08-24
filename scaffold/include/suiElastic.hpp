@@ -9,7 +9,7 @@
 #include <optional>
 #include <iostream>
 
-namespace sui
+namespace suies
 {
     class esBase
     {
@@ -227,13 +227,31 @@ namespace sui
         template<typename T>
         void appendField(const T& val)
         {
-            append("field", val);
+            append("fields", val);
         }
 
         template<typename T>
         void setQuery(const T& val)
         {
             add("query", val);
+        }
+
+        template<typename T>
+        void setType(const T& val)
+        {
+            add("type", val);
+        }
+
+        template<typename T>
+        void setFuzziness(const T& val)
+        {
+            add("fuzziness", val);
+        }
+
+        template<typename T>
+        void setOperator(const T& val)
+        {
+            add("operator", val);
         }
 
     private:
@@ -304,7 +322,7 @@ namespace sui
         suiQuery();
         void setMatchAll();
         std::shared_ptr<suiBool> QBool();
-    
+
     private:
 
     };
@@ -336,6 +354,16 @@ namespace sui
             this->addElement(key, curJson);
             return curJson;
         }
+    };
+
+    class suiFilter: public esQArray
+    {
+    public:
+        using Ptr = std::shared_ptr<suiFilter>;
+        suiFilter();
+
+        suiTerm::Ptr getFilterTerm(const std::string& key);
+    private:
 
     };
 
@@ -348,6 +376,7 @@ namespace sui
         suiMust::Ptr must();
         suiMustNot::Ptr mustNot();
         suiShould::Ptr should();
+        suiFilter::Ptr filter();
 
         void minimum_should_match(const size_t count);
     };
@@ -427,11 +456,33 @@ namespace sui
 
     };
 
+    enum class sortType
+    {
+        ascending = 0, //升序
+        descending = 1 //降序
+    };
+
+    class suiSort: public esArray
+    {
+    public:
+        using Ptr = std::shared_ptr<suiSort>;
+        suiSort();
+
+        void addOrder(const std::string& key, sortType type);
+    };
+
     class suiSearch: public esQObject, public suiRequest
     {
     public:
         suiSearch(const std::string& indexName);
         suiQuery::Ptr query();
+        suiSort::Ptr sort();
+
+        //开启_source
+        void setSource();
+
+        void setFrom(const size_t count);
+        void setSize(const size_t count);
     private:
 
     };

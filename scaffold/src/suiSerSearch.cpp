@@ -122,8 +122,9 @@ namespace suiEtcd
         }
 
         //开始创建监视器
-        std::string key = "/" + _serName;
-        
+        std::string key = "/";
+        if(!_serName.empty())
+            key += _serName + '/';
         INFO("开始监控服务变化: {}", key);
         _watcher.reset(new etcd::Watcher(_addr, key, [this](const etcd::Response& resp) {
             this->callback(resp);

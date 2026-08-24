@@ -44,6 +44,11 @@ namespace suiUser
         _redisSetting = settings;
     }
 
+    void userServerBuild::setFileRemoveSetting(suiQueue::queueSetting settings)
+    {
+        _fileRemoveSetting = settings;
+    }
+
     suiUserServer::ptr userServerBuild::build()
     {
         //创建etcd
@@ -52,13 +57,15 @@ namespace suiUser
 
         //创建mq客户端
         suiQueue::MQClient::ptr _mqClienrt = std::make_shared<suiQueue::MQClient>(_mqurl);
-
-        //创建操作句柄
-        suiUserServerData::ptr userMetaOperation = std::make_shared<suiUserServerData>(_odbSetting, _redisSetting, _mqClienrt);
         //创建邮箱操作句柄
         suiMail::suiMailClient::ptr mailClient = std::make_shared<suiMail::suiMailClient>(_imapSetting);
+        //创建文件删除句柄
+        suiCacheSync::CacheSyncClient::ptr cacheSyncClient = std::make_shared<suiCacheSync::CacheSyncClient>(_mqClienrt, _fileRemoveSetting, nullptr);
+
+        //创建操作句柄
+        suiUserServerData::ptr userMetaOperation = std::make_shared<suiUserServerData>(_odbSetting, _redisSetting, _mqClienrt, mailClient, cacheSyncClient);
         //创建brpc服务器
-        suiUserServerRpc* _rpc = new suiUserServerRpc(userMetaOperation, mailClient);
+        suiUserServerRpc* _rpc = new suiUserServerRpc(userMetaOperation);
 
         //构造server对象
         std::shared_ptr<brpc::Server> _server = std::make_shared<brpc::Server>();

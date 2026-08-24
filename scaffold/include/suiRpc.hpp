@@ -39,6 +39,8 @@ namespace suiRpc
     private:
         //多节点管理类
     public:
+        using ptr = std::shared_ptr<svcChannels>;
+
         svcChannels();
         ~svcChannels();
         
@@ -52,7 +54,7 @@ namespace suiRpc
     };
 
 
-    class ClosureFactor
+    class ClosureFactory
     {
     public:
         using callBackFun = std::function<void()>;
@@ -62,7 +64,6 @@ namespace suiRpc
             using ptr = std::shared_ptr<Object>;
             callBackFun callback;
         };
-
         static void asyncCallback(const Object::ptr obj);
     };
 

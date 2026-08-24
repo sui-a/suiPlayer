@@ -1,6 +1,6 @@
 #include "suiElastic.hpp"
 
-namespace sui
+namespace suies
 {
     esBase::esBase(const std::string& key) 
     : _key(key)
@@ -448,6 +448,20 @@ namespace sui
 
     }
 
+    suiFilter::suiFilter()
+        : esQArray("filter")
+    {
+
+    }
+
+    suiTerm::Ptr suiFilter::getFilterTerm(const std::string& key)
+    {
+        auto curJson = newObject("");
+        auto curTerm = std::make_shared<suiTerm>(key);
+        curJson->addElement("term", curTerm);
+        return curTerm;
+    }
+
     suiBool::suiBool()
         :esQObject("bool")
     {
@@ -490,6 +504,19 @@ namespace sui
         //不存在
         curJson = std::make_shared<suiShould>();
         addElement("should", curJson);
+        return curJson;
+    }
+
+    suiFilter::Ptr suiBool::filter()
+    {
+        auto curJson = std::dynamic_pointer_cast<suiFilter>(getElement("filter"));
+        if(curJson != nullptr)
+        {
+            return std::dynamic_pointer_cast<suiFilter>(curJson);
+        }
+        //不存在
+        curJson = std::make_shared<suiFilter>();
+        addElement("filter", curJson);
         return curJson;
     }
 
@@ -537,7 +564,7 @@ namespace sui
             return elasticlient::Client::HTTPMethod::DELETE;
         else if(_operation == "PUT")
             return elasticlient::Client::HTTPMethod::PUT;
-
+        
         //默认输出POST
         return elasticlient::Client::HTTPMethod::POST;
     }
@@ -598,9 +625,33 @@ namespace sui
         return curJson;
     }
 
+    suiSort::suiSort()
+        : esArray("sort")
+    {
+
+    }
+
+    void suiSort::addOrder(const std::string& key, sortType type)
+    {
+        std::string order;
+        if(type == sortType::ascending)
+            order = "asc";
+        else if(type == sortType::descending)
+            order = "desc";
+        else
+            return;
+        auto curJson = newObject("");
+        if(curJson != nullptr)
+        {
+            auto orderJson = std::make_shared<esBase>(key);
+            orderJson->add("order", order);
+            curJson->addElement(key, orderJson);
+        }
+    }
+
     suiSearch::suiSearch(const std::string& indexName)
         : esQObject("")
-        , suiRequest(indexName, "_doc", "GET", "")
+        , suiRequest(indexName, "_search", "GET", "")
     {
 
     }
@@ -616,6 +667,34 @@ namespace sui
         curJson = std::make_shared<suiQuery>();
         addElement("query", curJson);
         return curJson;
+    }
+
+    suiSort::Ptr suiSearch::sort()
+    {
+        suiSort::Ptr curJson = std::dynamic_pointer_cast<suiSort>(getElement("sort"));
+        if(curJson != nullptr)
+        {
+            return curJson;
+        }
+        //不存在
+        curJson = std::make_shared<suiSort>();
+        addElement("sort", curJson);
+        return curJson;
+    }
+
+    void suiSearch::setSource()
+    {
+        add("_source", false);
+    }
+    
+    void suiSearch::setFrom(const size_t count)
+    {
+        add("from", count);
+    }
+
+    void suiSearch::setSize(const size_t count)
+    {
+        add("size", count);
     }
 
     void suiQuery::setMatchAll()
@@ -773,7 +852,6 @@ namespace sui
         {
             return true;
         }
-        std::cout << "请求失败: " << resp.text << std::endl;
         return false;
     }
     
@@ -821,6 +899,7 @@ namespace sui
         {
             body = "";
         }
+
         auto resp = _client->performRequest(
                 method,
                 path,

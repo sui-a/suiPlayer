@@ -7,8 +7,11 @@ namespace suiCacheSync
         , _set(set)
     {
         _publisherQueue = std::make_shared<suiQueue::suiPublisher>(MqClientPtr, set);
-        _subscribeQueue = std::make_shared<suiQueue::suiSubscriber>(MqClientPtr, set);
-        _subscribeQueue->consume(std::bind(&CacheSyncClient::callback, this, std::placeholders::_1));
+        if(callback)
+        {
+            _subscribeQueue = std::make_shared<suiQueue::suiSubscriber>(MqClientPtr, set);
+            _subscribeQueue->consume(std::bind(&CacheSyncClient::callback, this, std::placeholders::_1));
+        }
     }
 
     void CacheSyncClient::syncCache(const std::string& cache_key)

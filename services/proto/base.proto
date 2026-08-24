@@ -103,11 +103,11 @@ message VideoInfo {
   optional string photoFileId = 8; // 封面图片文件ID
   optional int32 likeCount = 9; // 点赞数
   optional int32 playCount = 10; // 播放数
-  optional int32 videoSize = 11; // 视频大小
+  optional int64 videoSize = 11; // 视频大小
   optional string videoDesc = 12; // 视频描述
   optional string videoTitle = 13; // 视频标题
-  optional int32 videoDuration = 14; // 视频时长
-  optional string videoUpTime = 15; // 视频上传时间
+  optional int64 videoDuration = 14; // 视频时长
+  optional int64 videoUpTime = 15; // 视频上传时间
   optional string checkerId = 16; // 审核员ID
   optional string checkerName = 17; // 审核员名字
   optional string checkerAvatar = 18; // 审核员头像

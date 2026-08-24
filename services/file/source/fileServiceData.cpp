@@ -122,7 +122,7 @@ namespace suiFileService
             odb::transaction t(_db->begin());
             auto& dbHandler = t.database();
             suiFile::FileData sedata(dbHandler);
-            auto fileMeta = sedata.selectFileByFileId(file_id);
+            suiDataSql::suiFileMeta::ptr fileMeta = sedata.selectFileByFileId(file_id);
             t.commit();
             return fileMeta;
         }

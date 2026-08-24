@@ -6,6 +6,7 @@
 #include <suiScaffold/suiFastdfs.hpp>
 #include "userServerData.hpp"
 #include "userServerRpc.hpp"
+#include "cache_sync.hpp"
 
 namespace suiUser
 {
@@ -45,6 +46,7 @@ namespace suiUser
         void setListenPort(int port);
         void setOdbSetting(suiOdb::odbSetting settings);
         void setRedisSetting(suiRedis::redisSettings settings);
+        void setFileRemoveSetting(suiQueue::queueSetting settings);
 
         suiUserServer::ptr build();
     private:
@@ -60,5 +62,6 @@ namespace suiUser
         suiMail::MailSetting _imapSetting;
         //监听端口
         int _listen_port = 0;
+        suiQueue::queueSetting _fileRemoveSetting;
     };
 }

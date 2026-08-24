@@ -4,6 +4,7 @@ extern "C" {
     #include <libavcodec/avcodec.h>
     #include <libavutil/avutil.h>
 }
+#include <memory>
 #include <utility>
 #include <sstream>
 #include <algorithm>
@@ -44,6 +45,7 @@ namespace suiPeg
     class HLSTranscoder
     {
     public:
+        using ptr = std::shared_ptr<HLSTranscoder>;
         HLSTranscoder(hlsSettings& settings);
         ~HLSTranscoder();
 

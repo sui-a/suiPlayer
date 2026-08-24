@@ -179,7 +179,7 @@ std::string LoginByCode(suiRpc::Channels::Ptr _channels
 }
 
 //注销登录
-bool logout(suiRpc::Channels::Ptr _channels, const std::string& sessionId, const std::string& userId)
+bool logout(suiRpc::Channels::Ptr _channels, const std::string& sessionId)
 {
     //获取rpc通道
     suiRpc::ChannelPtr curChannel;
@@ -200,7 +200,6 @@ bool logout(suiRpc::Channels::Ptr _channels, const std::string& sessionId, const
     suiApi::logoutRsp rsp;
     req.set_id("5");
     req.set_sessionid(sessionId);
-    req.set_userid(userId);
     //调用服务
     stub.logout(cntl, &req, &rsp, nullptr);
     if(cntl->Failed())
@@ -219,7 +218,7 @@ bool logout(suiRpc::Channels::Ptr _channels, const std::string& sessionId, const
 }
 
 //设置盐
-void setSalt(suiRpc::Channels::Ptr _channels, const std::string& sessionId, const std::string& userId, const std::string& salt)
+void setSalt(suiRpc::Channels::Ptr _channels, const std::string& sessionId, const std::string& salt)
 {
     //获取rpc通道
     suiRpc::ChannelPtr curChannel;
@@ -240,7 +239,6 @@ void setSalt(suiRpc::Channels::Ptr _channels, const std::string& sessionId, cons
     suiApi::SetSaltRsp rsp;
     req.set_id("6");
     req.set_sessionid(sessionId);
-    req.set_userid(userId);
     req.set_salt(salt);
     //调用服务
     stub.SetSalt(cntl, &req, &rsp, nullptr);
@@ -261,7 +259,7 @@ void setSalt(suiRpc::Channels::Ptr _channels, const std::string& sessionId, cons
 }
 
 //获取盐
-void getSalt(suiRpc::Channels::Ptr _channels, const std::string& sessionId, const std::string& userId)
+void getSalt(suiRpc::Channels::Ptr _channels, const std::string& sessionId)
 {
     //获取rpc通道
     suiRpc::ChannelPtr curChannel;
@@ -282,7 +280,6 @@ void getSalt(suiRpc::Channels::Ptr _channels, const std::string& sessionId, cons
     suiApi::GetSaltRsp rsp;
     req.set_id("7");
     req.set_sessionid(sessionId);
-    req.set_userid(userId);
     //调用服务
     stub.GetSalt(cntl, &req, &rsp, nullptr);
     if(cntl->Failed())
@@ -302,7 +299,7 @@ void getSalt(suiRpc::Channels::Ptr _channels, const std::string& sessionId, cons
 }
 
 //设置用户名
-void setUserName(suiRpc::Channels::Ptr _channels, const std::string& sessionId, const std::string& userId, const std::string& userName)
+void setUserName(suiRpc::Channels::Ptr _channels, const std::string& sessionId, const std::string& userName)
 {
     //获取rpc通道
     suiRpc::ChannelPtr curChannel;
@@ -323,7 +320,6 @@ void setUserName(suiRpc::Channels::Ptr _channels, const std::string& sessionId, 
     suiApi::setUserNicknameRsp rsp;
     req.set_id("8");
     req.set_sessionid(sessionId);
-    req.set_userid(userId);
     req.set_nickname(userName);
     //调用服务
     stub.setUserNickname(cntl, &req, &rsp, nullptr);
@@ -344,7 +340,7 @@ void setUserName(suiRpc::Channels::Ptr _channels, const std::string& sessionId, 
 }
 
 //设置密码
-void setPassword(suiRpc::Channels::Ptr _channels, const std::string& sessionId, const std::string& userId, const std::string& password)
+void setPassword(suiRpc::Channels::Ptr _channels, const std::string& sessionId, const std::string& password)
 {
     //获取rpc通道
     suiRpc::ChannelPtr curChannel;
@@ -365,7 +361,6 @@ void setPassword(suiRpc::Channels::Ptr _channels, const std::string& sessionId, 
     suiApi::setPasswordRsp rsp;
     req.set_id("8");
     req.set_sessionid(sessionId);
-    req.set_userid(userId);
     req.set_password(password);
     //调用服务
     stub.setPassword(cntl, &req, &rsp, nullptr);
@@ -456,7 +451,7 @@ std::string identityTypeTransformation(suiApi::identityType identityType)
 }
 
 //获取某用户信息
-void getUserInfo(suiRpc::Channels::Ptr _channels, const std::string& sessionId, const std::string& userid, const std::string& targetuserid)
+void getUserInfo(suiRpc::Channels::Ptr _channels, const std::string& sessionId, const std::string& targetuserid)
 {
     //获取rpc通道
     suiRpc::ChannelPtr curChannel;
@@ -477,8 +472,7 @@ void getUserInfo(suiRpc::Channels::Ptr _channels, const std::string& sessionId, 
     suiApi::userInfoRsp rsp;
     req.set_id("10");
     req.set_sessionid(sessionId);
-    req.set_userid(userid);
-    req.set_targetuserid(targetuserid);
+    req.set_userid(targetuserid);
     //调用服务
     stub.getUserInfo(cntl, &req, &rsp, nullptr);
     if(cntl->Failed())
@@ -511,8 +505,49 @@ void getUserInfo(suiRpc::Channels::Ptr _channels, const std::string& sessionId, 
     return;
 }
 
+//修改头像
+void setUserHand(suiRpc::Channels::Ptr _channels, const std::string& sessionId, const std::string& head_id)
+{
+    //获取rpc通道
+    suiRpc::ChannelPtr curChannel;
+    while(1)
+    {
+        curChannel = _channels->select();   
+        if(curChannel)
+            break;
+        INFO("等待服务上线");
+        sleep(1);
+    }
+    //发起实例化服务对象与控制对象
+    suiApi::userServices_Stub stub(&(*curChannel));
+    brpc::Controller* cntl = new brpc::Controller();
+    cntl->set_timeout_ms(-1); //无限等待
+    //定义调用参数
+    suiApi::setUserAvatarReq req;
+    suiApi::setUserAvatarRsp rsp;
+    req.set_id("9");
+    req.set_sessionid(sessionId);
+    req.set_fileid(head_id);
+    //调用服务
+    stub.setUserAvatar(cntl, &req, &rsp, nullptr);
+    if(cntl->Failed())
+    {
+        //调用失败
+        ERROR("stub请求失败: {}", cntl->ErrorText());
+        exit(0);
+    }
+    if(rsp.errorcode() != 0)
+    {
+        //出现错误
+        ERROR("获取用户信息失败, 错误为: {}", rsp.errormsg());
+        exit(0);
+    }
+    INFO("修改头像成功");
+    return;
+}
+
 //关注用户
-void followUser(suiRpc::Channels::Ptr _channels, const std::string& sessionId, const std::string& userid, const std::string& targetuserid)
+void followUser(suiRpc::Channels::Ptr _channels, const std::string& sessionId, const std::string& targetuserid)
 {
     //获取rpc通道
     suiRpc::ChannelPtr curChannel;
@@ -533,7 +568,6 @@ void followUser(suiRpc::Channels::Ptr _channels, const std::string& sessionId, c
     suiApi::newFollowRsp rsp;
     req.set_id("12");
     req.set_sessionid(sessionId);
-    req.set_userid(userid);
     req.set_targetuserid(targetuserid);
     //调用服务
     stub.newFollow(cntl, &req, &rsp, nullptr);
@@ -554,7 +588,7 @@ void followUser(suiRpc::Channels::Ptr _channels, const std::string& sessionId, c
 }
 
 //取消关注
-void notfollowUser(suiRpc::Channels::Ptr _channels, const std::string& sessionId, const std::string& userid, const std::string& targetuserid)
+void notfollowUser(suiRpc::Channels::Ptr _channels, const std::string& sessionId, const std::string& targetuserid)
 {
     //获取rpc通道
     suiRpc::ChannelPtr curChannel;
@@ -575,7 +609,6 @@ void notfollowUser(suiRpc::Channels::Ptr _channels, const std::string& sessionId
     suiApi::DelFollowRsp rsp;
     req.set_id("13");
     req.set_sessionid(sessionId);
-    req.set_userid(userid);
     req.set_targetuserid(targetuserid);
     //调用服务
     stub.DelFollow(cntl, &req, &rsp, nullptr);
@@ -596,7 +629,7 @@ void notfollowUser(suiRpc::Channels::Ptr _channels, const std::string& sessionId
 }
 
 //新增管理员
-void newAdmin(suiRpc::Channels::Ptr _channels, const std::string& sessionId, const std::string& userid, const std::string& targetuserid)
+void newAdmin(suiRpc::Channels::Ptr _channels, const std::string& sessionId, const std::string& targetuserid)
 {
     //获取rpc通道
     suiRpc::ChannelPtr curChannel;
@@ -617,7 +650,6 @@ void newAdmin(suiRpc::Channels::Ptr _channels, const std::string& sessionId, con
     suiApi::NewAdminRsp rsp;
     req.set_id("14");
     req.set_sessionid(sessionId);
-    req.set_userid(userid);
     req.set_targetuserid(targetuserid);
     //调用服务
     stub.NewAdmin(cntl, &req, &rsp, nullptr);
@@ -739,7 +771,7 @@ suiApi::AdminInfo getAdminInfo(suiRpc::Channels::Ptr _channels, const std::strin
     return resule;
 }
 
-void setAdminInfo(suiRpc::Channels::Ptr _channels, const std::string& sessionId, const std::string& userid, suiApi::AdminInfo adminInfo)
+void setAdminInfo(suiRpc::Channels::Ptr _channels, const std::string& sessionId, suiApi::AdminInfo adminInfo)
 {
     //获取rpc通道
     suiRpc::ChannelPtr curChannel;
@@ -760,7 +792,6 @@ void setAdminInfo(suiRpc::Channels::Ptr _channels, const std::string& sessionId,
     suiApi::SetAdminRsp rsp;
     req.set_id("17");
     req.set_sessionid(sessionId);
-    req.set_userid(userid);
     INFO("修改的目标id:{}", adminInfo.userid());
     auto setAdmin = req.mutable_userinfo();
     setAdmin->set_userid(adminInfo.userid());
@@ -788,7 +819,7 @@ void setAdminInfo(suiRpc::Channels::Ptr _channels, const std::string& sessionId,
 }
 
 //删除普通管理员
-void delNormalAdmin(suiRpc::Channels::Ptr _channels, const std::string& sessionId, const std::string& userid, const std::string& targetuserid)
+void delNormalAdmin(suiRpc::Channels::Ptr _channels, const std::string& sessionId, const std::string& targetuserid)
 {
     //获取rpc通道
     suiRpc::ChannelPtr curChannel;
@@ -809,7 +840,6 @@ void delNormalAdmin(suiRpc::Channels::Ptr _channels, const std::string& sessionI
     suiApi::DelAdminRsp rsp;
     req.set_id("18");
     req.set_sessionid(sessionId);
-    req.set_userid(userid);
     req.set_targetuserid(targetuserid);
     //调用服务
     stub.DelAdmin(cntl, &req, &rsp, nullptr);
@@ -830,7 +860,7 @@ void delNormalAdmin(suiRpc::Channels::Ptr _channels, const std::string& sessionI
 }
 
 //设置某个用户状态
-void setStatus(suiRpc::Channels::Ptr _channels, const std::string& sessionId, const std::string& userid
+void setStatus(suiRpc::Channels::Ptr _channels, const std::string& sessionId
     , const std::string& targetuserid, bool isEnable)
 {
     //获取rpc通道
@@ -852,7 +882,6 @@ void setStatus(suiRpc::Channels::Ptr _channels, const std::string& sessionId, co
     suiApi::setUserStatusRsp rsp;
     req.set_id("19");
     req.set_sessionid(sessionId);
-    req.set_userid(userid);
     req.set_targetuserid(targetuserid);
     req.set_userstatus(isEnable ? suiApi::userStatus::userStatusEnable : suiApi::userStatus::userStatusDisable);
     //调用服务
@@ -870,6 +899,7 @@ void setStatus(suiRpc::Channels::Ptr _channels, const std::string& sessionId, co
         exit(0);
     }
     INFO("设置用户状态成功");
+    delete cntl;
     return;
 }
 
@@ -882,7 +912,7 @@ int main(int argc, char* argv[])
     
     //创建搜索服务
     suiRpc::Channels::Ptr _channels = std::make_shared<suiRpc::Channels>(FLAGS_user_server_name);
-    suiEtcd::serSearch::ptr _search = std::make_shared<suiEtcd::serSearch>(FLAGS_user_server_name, FLAGS_registry_center
+    suiEtcd::serSearch::ptr _search = std::make_shared<suiEtcd::serSearch>("", FLAGS_registry_center
         , [_channels](std::string serName, std::string addr){
         _channels->insert(addr);
         INFO("添加服务： {} 的节点: {}", serName, addr);
@@ -890,11 +920,10 @@ int main(int argc, char* argv[])
         INFO("删除服务： {} 的节点: {}", serName, addr);
         _channels->remove(addr);
     });
-
     //开始服务发现
     _search->search();
     INFO("点击回车，开始测试");
-    //std::cin.get();
+    std::cin.get();
     INFO("开始注册临时会话与会话登录");
     std::string sessionId;
     {
@@ -937,22 +966,24 @@ int main(int argc, char* argv[])
 
     {
         //设置盐
-        setSalt(_channels, sessionId, user_id, "123456");
+        setSalt(_channels, sessionId, "123456");
         //获取盐
-        getSalt(_channels, sessionId, user_id);
+        getSalt(_channels, sessionId);
         //修改用户名
-        setUserName(_channels, sessionId, user_id, "穗");
+        setUserName(_channels, sessionId, "穗");
         //修改密码
-        setPassword(_channels, sessionId, user_id, "123456");
+        setPassword(_channels, sessionId, "123456");
         //获取管理员信息
-        getUserInfo(_channels, sessionId, user_id, "1111111111");
+        getUserInfo(_channels, sessionId, "111111");
+        //修改头像
+        setUserHand(_channels, sessionId, "123456");
     }
 
     INFO("自定义密码设置完成，点击回车继续");
     //std::cin.get();
     INFO("开始注销登录");
     {
-        auto logoutret = logout(_channels, sessionId, user_id);
+        auto logoutret = logout(_channels, sessionId);
         if(logoutret)
         {
             INFO("注销登录成功");
@@ -972,39 +1003,39 @@ int main(int argc, char* argv[])
     //std::cin.get();
     INFO("再次注销登录");
     {
-        logout(_channels, sessionId, user_id);
+        logout(_channels, sessionId);
     }
     INFO("注销登录成功, 点击回车继续");
     //std::cin.get();
     INFO("开始尝试登录管理员账号");
     std::string admin_user_id;
     {
-        admin_user_id = LoginByPassword(_channels, sessionId, "suisuipingan", "suisuipingan");
+        admin_user_id = LoginByPassword(_channels, sessionId, "111111", "suisuipingan");
     }
 
     INFO("管理员账号登录完成， 点击回车继续");
     //std::cin.get();
     INFO("开始获取某个用户信息");
     {
-        getUserInfo(_channels, sessionId, admin_user_id, user_id);
+        getUserInfo(_channels, sessionId, admin_user_id);
     }
     INFO("获取某个用户信息完毕");
     //std::cin.get();
     INFO("管理员用户关注原用户");
     {
-        followUser(_channels, sessionId, admin_user_id, user_id);
+        followUser(_channels, sessionId, admin_user_id);
     }
     INFO("关注完成，点击回车继续吧");
     //std::cin.get();
     INFO("开始取消关注");
     {
-        notfollowUser(_channels, sessionId, admin_user_id, user_id);
+        notfollowUser(_channels, sessionId, admin_user_id);
     }
     INFO("管理员用户取消关注原用户, 点击回车继续");
     //std::cin.get();
     INFO("开始新增普通管理员");
     {
-        newAdmin(_channels, sessionId, admin_user_id, user_id);
+        newAdmin(_channels, sessionId, user_id);
     }
     INFO("新增普通管理员成功，点击回车继续");
     //std::cin.get();
@@ -1024,7 +1055,7 @@ int main(int argc, char* argv[])
     //std::cin.get();
     INFO("编辑管理员信息");
     {
-        setAdminInfo(_channels, sessionId, admin_user_id, adminInfo);
+        setAdminInfo(_channels, sessionId, adminInfo);
     }
     INFO("编辑成功，点击回车继续");
     //std::cin.get();
@@ -1036,7 +1067,7 @@ int main(int argc, char* argv[])
     //std::cin.get();
     INFO("删除普通管理员");
     {
-        delNormalAdmin(_channels, sessionId, admin_user_id, user_id);
+        delNormalAdmin(_channels, sessionId, admin_user_id);
     }
     INFO("删除普通管理员成功，点击回车继续");
     //std::cin.get();
@@ -1048,13 +1079,13 @@ int main(int argc, char* argv[])
     //std::cin.get();
     INFO("以管理员身份设置某用户的状态");
     {
-        setStatus(_channels, sessionId, admin_user_id, user_id, false);
+        setStatus(_channels, sessionId, admin_user_id, false);
     }
     INFO("设置某用户状态完成，点击回车继续");
     //std::cin.get();
     INFO("注销登录");
     {
-        auto logoutret = logout(_channels, sessionId, admin_user_id);
+        auto logoutret = logout(_channels, sessionId);
         if(logoutret)
         {
             INFO("注销登录成功");
@@ -1070,4 +1101,3 @@ int main(int argc, char* argv[])
     std::cin.get();
     return 0;
 }
-

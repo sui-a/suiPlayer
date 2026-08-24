@@ -576,6 +576,6 @@ namespace suiFileService
         return createUploadId(Md5, downloadId);
     }
 
-    size_t suiFileRpcService::_standardChunkSize = 1024 * 1024 * 10;
+    size_t suiFileRpcService::_standardChunkSize = 1024 * 1024 * 1024; //默认单次下载大小为1GB
 
 }

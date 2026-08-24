@@ -31,6 +31,7 @@ int main()
        
         try
         {
+            /*
             {
                 //新增数据库事务
                 INFO("新增数据库事务");
@@ -82,12 +83,12 @@ int main()
                 INFO("查询更新数据库事务提交成功");
                 INFO("按任意键继续");
                 std::cin.get(); // 等待用户输入
-            }
+            }*/
             {
                 INFO("开始更新查询");
                 odb::transaction t(handler->begin());
                 suiFile::FileData fileData(t.database());
-                suiDataSql::suiFileMeta::ptr fileMeta = fileData.selectFileByFileId("123456");
+                suiDataSql::suiFileMeta::ptr fileMeta = fileData.selectFileByFileId("111222");
                 if (fileMeta == nullptr)
                 {
                     ERROR("查询文件失败");

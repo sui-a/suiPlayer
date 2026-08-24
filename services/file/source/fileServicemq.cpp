@@ -12,32 +12,30 @@ namespace suiFileService
         //fdfs服务全局都可能用，放在类外初始化
     }
 
-    bool fileRemoveMq::callback(std::string body)
+    bool fileRemoveMq::callback(std::string msg)
     {
-        //解析消息
-        suiApi::DeleteFileMsg msg;
-        std::vector<std::string> pathList;
-        bool ret = msg.ParseFromString(body);
-        if(!ret) {
-            ERROR("收到缓存同步消息，但反序列化失败");
-            return true;  //反序列化失败，但返回true 目的是不中断消息队列的消费 无效消息丢弃即可
-        }
-        int sz = msg.fileid_size();
-        //开始删除元数据
-        for(int i = 0; i < sz; i++) 
+        suiApi::DeleteCacheMsg body;
+        bool ret = body.ParseFromString(msg);
+        if(!ret)
         {
-            INFO("删除文件id: {}", msg.fileid(i));
-            auto curMate = _fileMetaService->getFileMeta(msg.fileid(i));
-            if(!curMate) 
-            {
-                ERROR("文件id: {} 不存在于数据库中", msg.fileid(i));
-                continue;
-            }
-            std::string fid = msg.fileid(i);
-            suifd::suiFastdfs::delete_file(fid); //删除文件
-            _fileMetaService->deleteFileMeta(fid); //删除元数据
+            INFO("解析消息失败, 消息内容: {}", msg);
+            return true;
         }
-        INFO("删除文件消息处理完成");
+        //删除文件元信息，并获取路径
+        auto fileMeta = _fileMetaService->getFileMeta(body.key(0));
+        INFO("删除文件{}的元信息", body.key(0));
+        if(fileMeta != nullptr)
+        {
+            std::string filePath = fileMeta->getPath().get();
+            //删除fdfs里的文件
+            suifd::suiFastdfs::delete_file(filePath);
+            INFO("删除文件{}完成, 路径: {}", body.key(0), filePath);
+        }
+        else
+        {
+            INFO("删除文件{}失败, 未找到文件元信息", body.key(0));
+        }
+        
         return true;
     }
 

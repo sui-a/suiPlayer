@@ -176,9 +176,5 @@ namespace suiSession
             insertToRedis(*curSession);
         return curSession;
     }   
-    
-
-
-
 
 }

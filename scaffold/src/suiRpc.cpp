@@ -119,15 +119,15 @@ namespace suiRpc
         return it->second->select();
     }
 
-    google::protobuf::Closure* ClosureFactor::create(callBackFun&& fun)
+    google::protobuf::Closure* ClosureFactory::create(callBackFun&& fun)
     {
-        ClosureFactor::Object::ptr obj = std::make_shared<ClosureFactor::Object>();
+        ClosureFactory::Object::ptr obj = std::make_shared<ClosureFactory::Object>();
         obj->callback = std::move(fun);
-        return brpc::NewCallback(&ClosureFactor::asyncCallback, obj);
+        return brpc::NewCallback(&ClosureFactory::asyncCallback, obj);
     }
 
 
-    void ClosureFactor::asyncCallback(const ClosureFactor::Object::ptr obj)
+    void ClosureFactory::asyncCallback(const ClosureFactory::Object::ptr obj)
     {
         obj->callback();
     }

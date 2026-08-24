@@ -480,6 +480,15 @@ namespace suiDataSql{
         videoStatusRemove = 6, //下架
     };
 
+    namespace videoStatusUtil
+    {
+        std::string toStringFromEnum(videoStatus video_status);
+        videoStatus getEnumFromString(const std::string& video_status);
+
+        int getIntFromEnum(videoStatus video_status);
+        videoStatus getEnumFromInt(int video_status);
+    }
+
     //视频元信息表
     #pragma db object table("tbl_video_meta")
     class suiVideoMeta
@@ -493,9 +502,9 @@ namespace suiDataSql{
         void setVideoFileId(const std::string& video_file_id);
         void setVideoCoverFileId(const std::string& video_cover_file_id);
         void setUploadUserId(const std::string& upload_user_id);
-        void setReviewUserId(const std::string& review_user_id);
+        void setReviewUserId(const odb::nullable<std::string>& review_user_id);
         void setVideoName(const std::string& video_name);
-        void setVideoDescription(const std::string& video_description);
+        void setVideoDescription(const odb::nullable<std::string>& video_description);
         void setVideoPlayCount(unsigned int video_play_count);
         void setVideoSize(uint64_t video_size);
         void setVideoDuration(uint64_t video_duration);
@@ -506,7 +515,7 @@ namespace suiDataSql{
         const std::string& getVideoFileId();
         const std::string& getVideoCoverFileId();
         const std::string& getUploadUserId();
-        const std::string& getReviewUserId();
+        const odb::nullable<std::string>& getReviewUserId();
         const std::string& getVideoName();
         const odb::nullable<std::string>& getVideoDescription();
         unsigned int getVideoPlayCount();
@@ -528,7 +537,7 @@ namespace suiDataSql{
         #pragma db not_null type("VARCHAR(128)")
         std::string _upload_user_id; //上传用户id
         #pragma db type("VARCHAR(128)")
-        std::string _review_user_id; //审核用户id
+        odb::nullable<std::string> _review_user_id; //审核用户id
         #pragma db not_null type("VARCHAR(128)")
         std::string _video_name; //视频标题
         #pragma db type("TEXT")
@@ -550,6 +559,33 @@ namespace suiDataSql{
         #pragma db index("review_user_id_idx") member(_review_user_id)
         #pragma db index("video_name_idx") member(_video_name)
         #pragma db index("video_status_idx") member(_video_status)
+    };
+
+    struct suiVideoMetaList
+    {
+        using ptr = std::shared_ptr<suiVideoMetaList>;
+        size_t total; //总数
+        std::vector<suiVideoMeta> list; //视频列表
+    };
+
+    //视频Id列表
+    #pragma db view object(suiVideoMeta) query((?))
+    struct VideoIdList 
+    {
+        using ptr = std::shared_ptr<VideoIdList>;
+        #pragma db column(suiVideoMeta::_video_id)
+        std::string video_id;
+        #pragma db column(suiVideoMeta::_video_upload_time)
+        std::uint64_t order_field;
+    };
+
+
+    //视频数量视图
+    #pragma db view object(suiVideoMeta)
+    struct suiVideoCountView
+    {
+        #pragma db column("count(*)")
+        std::size_t count;
     };
 
     //⽤⼾点赞关联表
@@ -578,6 +614,14 @@ namespace suiDataSql{
         //创建索引
         #pragma db index("video_id_idx") member(_video_id)
         #pragma db index("user_like_unique_idx") unique member(_user_id) member(_video_id)
+    };
+
+    //某用户点赞了的视频列表
+    struct suiUserLikeMetaList
+    {
+        using ptr = std::shared_ptr<suiUserLikeMetaList>;
+        size_t total; //总数
+        std::vector<suiUserLikeMeta> list; //某用户点赞了的视频列表
     };
 
     //视频点赞总量视图
@@ -620,7 +664,7 @@ namespace suiDataSql{
     {
         //总数
         #pragma db column("COUNT(*)")
-        int total;
+        size_t total;
     };
 
     //批量返回用户info列表
@@ -631,7 +675,7 @@ namespace suiDataSql{
         //用户信息列表
         std::vector<suiUsrMeta> list;
         //总数
-        int total = 0;
+        size_t total = 0;
     };
 
     //联查用户表与权限身份映射表
@@ -691,6 +735,13 @@ namespace suiDataSql{
         //主键固定存在主索引
     };
 
+    //所有标签列表
+    struct videoTagList
+    {
+        using ptr = std::shared_ptr<videoTagList>;
+        std::vector<std::pair<long long, std::string>> list;
+    };
+
     //视频分类映射表
     #pragma db object table("tbl_video_category_meta")
     class suiVideoTagMeta
@@ -731,6 +782,29 @@ namespace suiDataSql{
         suiVideoTagMeta::ptr videoMeta;
     };
 
+    //视频分类与视频元信息映射视图，返回视频id与上传时间
+    #pragma db view object(suiVideoMeta) \
+            object(suiVideoTagMeta: suiVideoTagMeta::_video_id == suiVideoMeta::_video_id)\
+            query((?))
+    struct TaggedVideoItem 
+    {
+        using ptr = std::shared_ptr<TaggedVideoItem>;
+        #pragma db column(suiVideoMeta::_video_id)
+        std::string video_id;
+        #pragma db column(suiVideoMeta::_video_upload_time)
+        std::uint64_t order_field;
+    };
+
+    //视频数量视图
+    #pragma db view object(suiVideoMeta) \
+            object(suiVideoTagMeta: suiVideoTagMeta::_video_id == suiVideoMeta::_video_id)\
+            query((?))
+    struct TaggedVideoCount
+    {
+        #pragma db column("count(*)")
+        std::size_t count;
+    };
+
     #pragma db view object(suiTagMeta) \
             object(suiVideoTagMeta: suiVideoTagMeta::_tag_id == suiTagMeta::_tag_id)\
             query((?))
@@ -749,7 +823,7 @@ namespace suiDataSql{
     {
         using ptr = std::shared_ptr<videoTagTotal>;
         #pragma db column("COUNT(*)")
-        int total;
+        size_t total;
     };
 
     struct suiVideoListByTag
@@ -758,7 +832,7 @@ namespace suiDataSql{
         //视频分类列表
         std::vector<suiVideoTagMeta> list;
         //总数
-        int total = 0;
+        size_t total = 0;
     };
 
     struct suiGetTagsByVideoRsp

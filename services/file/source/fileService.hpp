@@ -28,7 +28,6 @@ namespace suiFileService
         std::shared_ptr<brpc::Server> _server;
         //mq对象（异步删除）
         suiFileService::fileRemoveMq::ptr _fileRemoveMq;
-
     };
 
     struct registrySettings

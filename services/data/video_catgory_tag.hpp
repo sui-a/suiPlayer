@@ -16,18 +16,20 @@ namespace suiVideocatgoryTag
         videocatgoryTag(odb::database& db);
 
         //添加新标签
-        void addTag(std::string& tag_description);
+        void addTag(const std::string& tag_description);
         //通过标签描述索引标签
         suiDataSql::suiTagMeta::ptr selectTag(const std::string& tag_description);
         suiDataSql::suiTagMeta::ptr selectTag(long long tag_id);
+        suiDataSql::videoTagList selectAllTag();
+
         //删除标签
         void removeTag(long long tag_id);
         void removeTag(const std::string& description);
 
         //视频操作
         void addVideoTag(const std::string& video_id, long long tag_id);
-        suiDataSql::suiVideoTagMeta::ptr selectVideoTag(const std::string& video_id);
-        suiDataSql::suiVideoTagMeta::ptr selectVideoTag(long long tag_id);
+        std::vector<long long> selectVideoTag(const std::string& video_id);
+        std::vector<std::string> selectVideoTag(long long tag_id);
         suiDataSql::suiVideoTagMeta::ptr selectVideoTag(const std::string& video_id, long long tag_id);
         void removeVideoTag(const std::string& video_id, long long tag_id);
         void removeVideoTag(const std::string& video_id);

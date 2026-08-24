@@ -199,7 +199,6 @@ namespace suiUserStatics
                 //获取缓存用户信息
                 std::unordered_map<std::string, std::string> _data;
                 _redis.hgetall(rediskey, std::inserter(_data, _data.begin()));
-                
                 INFO("开始更新, 原来的值： {}， 修改为了 {}", std::stoll(_data[mapkey]), std::stoll(_data[mapkey]) + value);
                 _data[mapkey] = std::to_string(std::stoll(_data[mapkey]) + value);
                 //开始更新

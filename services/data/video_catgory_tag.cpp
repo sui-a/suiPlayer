@@ -8,7 +8,7 @@ namespace suiVideocatgoryTag
 
     }
 
-    void videocatgoryTag::addTag(std::string& tag_description)
+    void videocatgoryTag::addTag(const std::string& tag_description)
     {
         suiDataSql::suiTagMeta curtag;
         curtag.setTagDescription(tag_description);
@@ -31,6 +31,15 @@ namespace suiVideocatgoryTag
         return ret;
     }
 
+    suiDataSql::videoTagList videocatgoryTag::selectAllTag()
+    {
+        auto ret = _mysql.query<suiDataSql::suiTagMeta>();
+        suiDataSql::videoTagList out;
+        for(auto& it : ret)
+            out.list.push_back({it.getTagId(), it.getTagDescription()});
+        return out;
+    }
+
     void videocatgoryTag::removeTag(long long tag_id)
     {
         _mysql.erase_query<suiDataSql::suiTagMeta>(odb::query<suiDataSql::suiTagMeta>::tag_id == tag_id);
@@ -49,20 +58,26 @@ namespace suiVideocatgoryTag
         _mysql.persist(cur);
     }
 
-    suiDataSql::suiVideoTagMeta::ptr videocatgoryTag::selectVideoTag(const std::string& video_id)
+    std::vector<long long> videocatgoryTag::selectVideoTag(const std::string& video_id)
     {
-        auto ret = suiDataSql::suiVideoTagMeta::ptr(_mysql.query_one<suiDataSql::suiVideoTagMeta>(
+        auto ret = _mysql.query<suiDataSql::suiVideoTagMeta>(
             odb::query<suiDataSql::suiVideoTagMeta>::video_id == video_id
-        ));
-        return ret;
+        );
+        std::vector<long long> out;
+        for(auto& it : ret)
+            out.push_back(it.getTagId());
+        return out;
     }
 
-    suiDataSql::suiVideoTagMeta::ptr videocatgoryTag::selectVideoTag(long long tag_id)
+    std::vector<std::string> videocatgoryTag::selectVideoTag(long long tag_id)
     {
-        auto ret = suiDataSql::suiVideoTagMeta::ptr(_mysql.query_one<suiDataSql::suiVideoTagMeta>(
+        auto ret = _mysql.query<suiDataSql::suiVideoTagMeta>(
             odb::query<suiDataSql::suiVideoTagMeta>::tag_id == tag_id
-        ));
-        return ret;
+        );
+        std::vector<std::string> out;
+        for(auto& it : ret)
+            out.push_back(it.getVideoId());
+        return out;
     }
 
     suiDataSql::suiVideoTagMeta::ptr videocatgoryTag::selectVideoTag(const std::string& video_id, long long tag_id)
@@ -88,9 +103,11 @@ namespace suiVideocatgoryTag
     suiDataSql::suiVideoListByTag::ptr videocatgoryTag::select(const std::string& description, int page, int pageSize)
     {
         auto q = odb::query<suiDataSql::videoTagView>::suiTagMeta::tag_description == description;
-        q += suiDataSql::SqlPaginationUtil::buildPageClause(pageSize, page) + suiDataSql::SqlPaginationUtil::buildOrderByClause("primaryKey");
-        auto ret = _mysql.query<suiDataSql::videoTagView>(q);
+        //获取总数
         auto total = _mysql.query_one<suiDataSql::videoTagTotal>(q);
+        //再次添加条件
+        q += " " +suiDataSql::SqlPaginationUtil::buildOrderByClause("primaryKey") + " " + suiDataSql::SqlPaginationUtil::buildPageClause(pageSize, page);
+        auto ret = _mysql.query<suiDataSql::videoTagView>(q);
         suiDataSql::suiVideoListByTag::ptr out = std::make_shared<suiDataSql::suiVideoListByTag>();
         for(auto& itemPtr : ret)
             out->list.push_back(*itemPtr.videoMeta);

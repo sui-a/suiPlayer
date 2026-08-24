@@ -1,7 +1,4 @@
 #pragma once
-#include <string>
-#include <fstream>
-#include <sstream>
 #include <iostream>
 #include "data.hpp"
 #include "data-odb.hxx"
@@ -9,9 +6,6 @@
 #include "user.pb.h"
 #include "error.proto.hpp"
 #include <brpc/closure_guard.h>
-#include <suiScaffold/suiRandom.hpp>
-#include <suiScaffold/suiHash.hpp>
-#include <suiScaffold/suiMail.hpp>
 #include "userServerData.hpp"
 
 namespace suiUser
@@ -19,7 +13,7 @@ namespace suiUser
     class suiUserServerRpc : public suiApi::userServices
     {
     public:
-        suiUserServerRpc(suiUserServerData::ptr userMetaOperation, suiMail::suiMailClient::ptr mail);
+        suiUserServerRpc(suiUserServerData::ptr userMetaOperation);
 
         ~suiUserServerRpc();
 
@@ -123,38 +117,10 @@ namespace suiUser
                             ::google::protobuf::Closure* done) override;
 
     private:
-        //模板更换
-        void replaceAll(std::string& str, const std::string& from, const std::string& to);
-        //获取邮箱html内容
-        std::string getEmailHtmlContent(const std::string& title, const std::string& body, const std::string& targetEmail, const std::string& emailfrom);
-            
-        //用户状态转换
-        ::suiDataSql::userStatus userStatusTransformation(::suiApi::userStatus userStatus);
-        //用户身份
-        ::suiDataSql::identityType identityTransformation(::suiApi::identityType identity);
-        //用户角色类型转换
-        ::suiDataSql::roleType RoleTransformation(::suiApi::roleType Role);
-        //关注状态
-        bool isFollowTransformation(::suiApi::followStatus value);
-
-        //反转
-        //用户状态转换
-        ::suiApi::userStatus userStatusTransformation(::suiDataSql::userStatus userStatus);
-        //用户身份
-        ::suiApi::identityType identityTransformation(::suiDataSql::identityType identity);
-        //用户角色类型转换
-        ::suiApi::roleType RoleTransformation(::suiDataSql::roleType Role);
-        //关注状态
-        ::suiApi::followStatus isFollowTransformation(bool value);
+        
     private:
         suiUserServerData::ptr _userMetaOperation;
-        suiMail::suiMailClient::ptr _mail;
-
-        //html更换模板字段
-        static const std::string _emailHtmlTemplateFieldTitle;
-        static const std::string _emailHtmlTemplateFieldCode;
-        static const std::string _emailHtmlTemplateFieldTargetEmail;
-        static const std::string _emailHtmlTemplateFieldEmailfrom;
+        
     };
 
 

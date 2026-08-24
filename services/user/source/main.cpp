@@ -32,6 +32,11 @@ DEFINE_string(imap_username_set, "2076354958@qq.com", "imap发送邮箱");
 DEFINE_string(imap_passward, "uddbtalnaergciaf", "imap发送邮箱");
 DEFINE_string(imap_url_set, "smtps://smtp.qq.com:465", "imap发送邮箱");
 
+//设置文件删除队列的mq设置
+DEFINE_string(remove_exchange, "file_remove_exchange", "文件删除交换机名称");
+DEFINE_string(remove_exchange_type, "direct", "文件删除队列交换机类型");
+DEFINE_string(remove_queue, "file_remove_queue", "文件删除队列名称");
+DEFINE_string(remove_bind_key, "file_remove_key", "文件删除队列绑定键");
 
 
 int main(int argc, char* argv[])
@@ -62,6 +67,15 @@ int main(int argc, char* argv[])
         //设置消息队列
         {
             userServerBuild.setMqSettings(FLAGS_amqp_addr);
+        }
+        //设置文件删除队列
+        {
+            suiQueue::queueSetting removeQueueSetting;
+            removeQueueSetting.exchange = FLAGS_remove_exchange;
+            removeQueueSetting.exchangeType = FLAGS_remove_exchange_type;
+            removeQueueSetting.queue = FLAGS_remove_queue;
+            removeQueueSetting.bindKey = FLAGS_remove_bind_key;
+            userServerBuild.setFileRemoveSetting(removeQueueSetting);
         }
 
         //设置数据库
